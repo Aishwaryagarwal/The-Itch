@@ -516,7 +516,7 @@ async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r
       $('src-note').innerHTML = '<b class="dot"></b>Live data from public job boards and US Department of Labor filings.';
     }
   } else {
-    $('src-note').innerHTML = '<b class="dot stale"></b>Showing bundled sample data. Run <code>ingest.py</code> to generate <code>jobs.json</code>, this switches to live on its own.';
+    $('src-note').innerHTML = '<b class="dot stale"></b>Showing bundled sample data. Run <code>scripts/ingest.py</code> to generate <code>jobs.json</code>, this switches to live on its own.';
   }
   rebuildOptions(); cityOptions(''); render(); renderWatch();
 })();
@@ -524,7 +524,7 @@ async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r
 
   <p class="kicker">Built from public ATS job boards and US Department of Labor visa filing records.
   Sponsorship signal reflects past H-1B filings and is not a guarantee that an employer will sponsor today.
-  <a href="https://github.com/YOURNAME/nextgig">Source on GitHub</a></p>
+  <a href="https://github.com/aagarwal-29/nextgig">Source on GitHub</a></p>
 </div>
 </body>
 </html>

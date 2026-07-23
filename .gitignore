@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+.geocache.json
+
+# Raw DOL quarterly files are hundreds of MB. Collapse them into
+# sponsors.json with --build-sponsors and commit that instead.
+**/data/lca_*.csv
+**/data/lca_*.xlsx
+
+# Scratch output from discover.py
+**/data/discovered.json
+
+# Local Claude Code settings
+.claude/
+
+# iCloud sync artifacts
+*.icloud

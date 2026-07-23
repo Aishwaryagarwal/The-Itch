@@ -1,4 +1,9 @@
-name: refresh jobs
+name: nextgig refresh
+
+# Workflows only run from .github/workflows/ at the repository root, so this
+# lives here rather than beside the project it drives. The paths below reach
+# into job-market/nextgig/; the scripts resolve their own data and output
+# directories, so there is no working-directory juggling to do.
 
 on:
   schedule:
@@ -9,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: refresh
+  group: nextgig-refresh
   cancel-in-progress: false
 
 jobs:
@@ -22,23 +27,24 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
+          cache-dependency-path: job-market/nextgig/requirements.txt
 
-      - run: pip install -r requirements.txt
+      - run: pip install -r job-market/nextgig/requirements.txt
 
       - name: Fetch open roles
-        run: python ingest.py --max-age 30 --no-phd
+        run: python job-market/nextgig/scripts/ingest.py --max-age 30 --no-phd
 
       - name: Commit if anything changed
         id: commit
         run: |
           git config user.name  "nextgig-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add -A job-market/nextgig
           if git diff --staged --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Nothing new today."
           else
-            git commit -m "refresh $(date -u +%F)"
+            git commit -m "nextgig: refresh $(date -u +%F)"
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi

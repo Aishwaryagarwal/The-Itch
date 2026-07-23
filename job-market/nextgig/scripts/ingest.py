@@ -8,15 +8,20 @@ Changes from v1:
   * work-setup detection rewritten (hybrid no longer loses to remote)
   * country configurable; sponsorship source swaps per country
 
-Run:
-  python ingest.py --out public/jobs.json --lca data/lca_*.csv --max-age 30 --no-phd
-  python ingest.py --review          # show unmatched titles, most frequent first
+Run, from job-market/nextgig/:
+  python scripts/ingest.py --lca data/lca_*.csv --max-age 30 --no-phd
+  python scripts/ingest.py --review  # show unmatched titles, most frequent first
 """
 
 import argparse, json, re, time, unicodedata, os, sys
 from collections import defaultdict, Counter
 from datetime import datetime, timezone, timedelta
 import requests
+
+# Anchored to this project's directory rather than the working directory, so the
+# script behaves the same run from here, from scripts/, or from the repo root in
+# CI. Note this is job-market/nextgig/, not the repository root.
+PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 COUNTRY = "us"          # "us" | "gb" | "ca" | "de" | "nl"
 
@@ -189,7 +194,7 @@ FETCHERS = {"greenhouse": fetch_greenhouse, "lever": fetch_lever, "ashby": fetch
 # put pins in places nobody is hiring, so we parse the string ourselves and
 # resolve against a bundled city table instead.
 
-GEO = "data/usgeo.json"
+GEO = os.path.join(PROJECT, "data", "usgeo.json")
 _geo = json.load(open(GEO)) if os.path.exists(GEO) else {"cities": {}, "states": {}}
 
 STATE_ABBR = {
@@ -276,7 +281,7 @@ def norm_employer(name):
     return re.sub(r"\s+", "", s)
 
 
-SPONSORS = "data/sponsors.json"
+SPONSORS = os.path.join(PROJECT, "data", "sponsors.json")
 
 
 def build_sponsors(paths, out=SPONSORS):
@@ -327,7 +332,7 @@ def load_sponsors(paths, country=COUNTRY):
 # habit of hiring for your titles, who have nothing open right now. This is
 # derived from posting history, so it maintains itself. Curated lists rot.
 
-HISTORY = "data/history.json"
+HISTORY = os.path.join(PROJECT, "data", "history.json")
 
 
 def update_history(rows):
@@ -424,7 +429,7 @@ ADJACENCY = {
 # ============================================================ MAIN
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="jobs.json")
+    ap.add_argument("--out", default=os.path.join(PROJECT, "public", "jobs.json"))
     ap.add_argument("--lca", nargs="*", default=[])
     ap.add_argument("--max-age", type=int, default=30)
     ap.add_argument("--no-phd", action="store_true")

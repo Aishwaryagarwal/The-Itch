@@ -1,81 +1,19 @@
-# NextGig
+# The Itch
 
-A live map of data, AI and analytics engineering roles at employers that have
-actually sponsored work visas.
+Personal projects, one directory each, grouped by the itch they scratch.
 
-Job boards tell you who is hiring. They do not tell you who sponsors. NextGig
-joins public job postings against US Department of Labor visa filing records so
-you can filter to employers with a real sponsorship track record, including the
-mid-market companies nobody has heard of.
-
-## What it does
-
-- **Open roles**: map and list of current postings, filtered by state, city,
-  title, level, work setup, salary floor, posting age and sponsorship record.
-- **Worth watching**: employers with a sponsorship record and a data team who
-  have nothing open right now, ranked by how overdue they are against their own
-  posting cadence.
-
-## The three pieces
-
-| File | Job |
+| Project | What it is |
 |---|---|
-| `index.html` | The site. Reads `jobs.json` and `watchlist.json`. |
-| `ingest.py` | Fetches current postings from company job boards, writes `jobs.json`. |
-| `discover.py` | Mines DOL visa records to find employers worth adding to the target list. |
+| [job-market/nextgig](job-market/nextgig) | A live map of data, AI and analytics roles at employers with a real visa sponsorship record. |
 
-## Running it locally
+## Conventions
 
-```bash
-pip install -r requirements.txt
+Each project is self-contained: its own `README.md`, its own dependencies, its
+own data. Nothing at the repository root belongs to a single project.
 
-# fetch current postings
-python ingest.py --max-age 30 --no-phd
+Scripts resolve paths relative to their own project directory rather than the
+working directory, so they behave the same run from anywhere.
 
-# serve the site
-python -m http.server 8000
-# open http://localhost:8000
-```
-
-Without `jobs.json` present, the site shows bundled sample data so you can see
-the interface before wiring up real feeds.
-
-## Adding sponsorship data
-
-Download the quarterly LCA disclosure files from
-[DOL Foreign Labor Certification Performance Data](https://www.dol.gov/agencies/eta/foreign-labor/performance),
-convert to CSV, and drop them in `data/`.
-
-```bash
-python ingest.py --lca data/lca_*.csv --max-age 30 --no-phd
-```
-
-## Finding companies to track
-
-```bash
-# every sponsoring employer running data roles in Michigan
-python discover.py --lca data/lca_*.csv --state MI
-
-# same industry as a current employer, by NAICS code
-python discover.py --lca data/lca_*.csv --naics 811310 333996
-
-# strong sponsors that are not household names, with job board lookup
-python discover.py --lca data/lca_*.csv --obscure --max-filings 300 --probe-ats
-```
-
-Paste the results into `TARGETS` in `ingest.py`.
-
-## Automation
-
-`.github/workflows/refresh.yml` re-runs the ingest on weekday mornings and
-commits the updated data. Enable it under the repository Actions tab.
-
-## Caveats
-
-Sponsorship signal reflects past filings. It is evidence an employer has
-sponsored before, not a promise they will sponsor now. Salary ranges come from
-postings that disclose them, which is a minority in most states.
-
-## License
-
-MIT
+GitHub Actions only reads workflows from `.github/workflows/` at the repository
+root, so per-project workflows live there under a `<project>-` name prefix and
+reach into the project folder.

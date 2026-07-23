@@ -9,21 +9,25 @@ Source: DOL LCA disclosure data (every H-1B/E-3 filing, quarterly XLSX)
 
 Typical use:
   # every sponsoring employer running data roles in Michigan
-  python discover.py --lca data/lca_*.csv --state MI
+  python scripts/discover.py --lca data/lca_*.csv --state MI
 
   # employers in the same industry as your current one
-  python discover.py --lca data/lca_*.csv --naics 811310 333996 423830
+  python scripts/discover.py --lca data/lca_*.csv --naics 811310 333996 423830
 
   # the actual point: strong sponsors nobody talks about
-  python discover.py --lca data/lca_*.csv --obscure --min-filings 5
+  python scripts/discover.py --lca data/lca_*.csv --obscure --min-filings 5
 
   # then find their job boards
-  python discover.py --lca data/lca_*.csv --state MI --probe-ats
+  python scripts/discover.py --lca data/lca_*.csv --state MI --probe-ats
 """
 
-import argparse, csv, json, re, sys, time, unicodedata
+import argparse, csv, json, os, re, sys, time, unicodedata
 from collections import defaultdict
 import requests
+
+# Anchored to this project's directory so output lands in the same place
+# regardless of the working directory it was launched from.
+PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ---------------------------------------------------------------- SOC codes
 # The occupational codes that map to data / analytics / AI work. LCA rows carry
@@ -213,7 +217,7 @@ def main():
     ap.add_argument("--strict", action="store_true", help="core data SOC codes only")
     ap.add_argument("--probe-ats", action="store_true", help="look for a public job board")
     ap.add_argument("--top", type=int, default=60)
-    ap.add_argument("--out", default="discovered.json")
+    ap.add_argument("--out", default=os.path.join(PROJECT, "data", "discovered.json"))
     args = ap.parse_args()
 
     emp = load(args.lca, set(SOC), strict=args.strict)
