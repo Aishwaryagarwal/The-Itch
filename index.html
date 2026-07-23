@@ -162,6 +162,10 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
 .wheat i.f{background:var(--sponsor)}
 
 .note{padding:10px 20px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);background:var(--card)}
+.note .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--sponsor);
+  margin-right:7px;vertical-align:middle;box-shadow:0 0 0 3px rgba(15,162,107,.16)}
+.note .dot.stale{background:var(--pay);box-shadow:0 0 0 3px rgba(180,112,10,.16)}
+.note .dim{color:var(--muted);opacity:.85}
 .note code{background:var(--paper);border:1px solid var(--line);padding:1px 5px;border-radius:4px;
   font-family:'JetBrains Mono',monospace;font-size:10px}
 @media(max-width:900px){
@@ -377,7 +381,7 @@ function groupSites(rows){
 function popupHTML(s){
   const roles=s.jobs.sort((a,b)=>a.age-b.age).map(j=>
     `<li>${j.title}<span>${j.lvl} · ${j.type} · $${j.min}k-$${j.max}k · ${j.age}d ago</span></li>`).join('');
-  return `<div class="pop"><h5>${s.co}</h5><div class="ps">${s.city}, ${s.st} · `+
+  return `<div class="pop"><h5>${s.co}</h5><div class="ps">${s.city?s.city+", ":""}${s.st} · `+
     (s.lca?`${s.lca} H-1B filings`:'no filing record')+`</div><ul>${roles}</ul></div>`;
 }
 
@@ -435,7 +439,7 @@ function render(){
   $('list').innerHTML = cards.length ? cards.map(({j,si})=>`
     <div class="card" data-s="${si}">
       <h3>${j.url?`<a href="${j.url}" target="_blank" rel="noopener">${j.title}</a>`:j.title}</h3><div class="co">${j.co}</div>
-      <div class="meta">${j.city}, ${j.st} ${j.zip} · via ${j.src}</div>
+      <div class="meta">${j.city?j.city+", ":""}${j.st}${j.zip?" "+j.zip:""} · via ${j.src}</div>
       <div class="pills">
         <span class="pill">${j.lvl}</span><span class="pill">${j.type}</span>
         ${j.min&&j.max?`<span class="pill pay">$${j.min}k-$${j.max}k</span>`:'<span class="pill">pay not posted</span>'}
@@ -492,13 +496,28 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r.ok?await r.json():null; }catch(e){ return null; } }
 
 (async function boot(){
-  const [j,w] = await Promise.all([grab('jobs.json'), grab('watchlist.json')]);
+  const [j,w,meta] = await Promise.all([grab('jobs.json'), grab('watchlist.json'), grab('meta.json')]);
   let live=false;
   if(Array.isArray(j)&&j.length){ JOBS.length=0; JOBS.push(...j); live=true; }
   if(Array.isArray(w)&&w.length){ WATCH.length=0; WATCH.push(...w); }
-  $('src-note').innerHTML = live
-    ? 'Live data, refreshed daily from public job boards and US Department of Labor filings.'
-    : 'Showing bundled sample data. Run <code>ingest.py</code> to generate <code>jobs.json</code> and this switches to live automatically.';
+  if(live){
+    let when='';
+    if(meta&&meta.updated){
+      const mins=Math.round((Date.now()-new Date(meta.updated))/60000);
+      when = mins<60 ? `${mins} min ago`
+           : mins<1440 ? `${Math.round(mins/60)} hr ago`
+           : `${Math.round(mins/1440)} days ago`;
+      const stale = mins > 3*1440;
+      $('src-note').innerHTML =
+        `<b class="dot${stale?' stale':''}"></b>Updated ${when} `+
+        `<span class="dim">, ${meta.roles} roles across ${meta.employers} employers, `+
+        `refreshed automatically from public job boards and US Department of Labor filings.</span>`;
+    } else {
+      $('src-note').innerHTML = '<b class="dot"></b>Live data from public job boards and US Department of Labor filings.';
+    }
+  } else {
+    $('src-note').innerHTML = '<b class="dot stale"></b>Showing bundled sample data. Run <code>ingest.py</code> to generate <code>jobs.json</code>, this switches to live on its own.';
+  }
   rebuildOptions(); cityOptions(''); render(); renderWatch();
 })();
 </script>

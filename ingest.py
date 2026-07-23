@@ -19,7 +19,6 @@ from datetime import datetime, timezone, timedelta
 import requests
 
 COUNTRY = "us"          # "us" | "gb" | "ca" | "de" | "nl"
-CACHE = ".geocache.json"
 
 TARGETS = [
     ("greenhouse", "databricks"), ("greenhouse", "snowflake"),
@@ -186,29 +185,87 @@ FETCHERS = {"greenhouse": fetch_greenhouse, "lever": fetch_lever, "ashby": fetch
 
 
 # ============================================================ GEOCODE
-_cache = json.load(open(CACHE)) if os.path.exists(CACHE) else {}
+# Offline lookup. Nominatim fuzzy-matched "Remote - USA" onto small towns and
+# put pins in places nobody is hiring, so we parse the string ourselves and
+# resolve against a bundled city table instead.
+
+GEO = "data/usgeo.json"
+_geo = json.load(open(GEO)) if os.path.exists(GEO) else {"cities": {}, "states": {}}
+
+STATE_ABBR = {
+ "alabama":"AL","alaska":"AK","arizona":"AZ","arkansas":"AR","california":"CA","colorado":"CO",
+ "connecticut":"CT","delaware":"DE","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID",
+ "illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA",
+ "maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN",
+ "mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV",
+ "new hampshire":"NH","new jersey":"NJ","new mexico":"NM","new york":"NY",
+ "north carolina":"NC","north dakota":"ND","ohio":"OH","oklahoma":"OK","oregon":"OR",
+ "pennsylvania":"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD",
+ "tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA",
+ "washington":"WA","west virginia":"WV","wisconsin":"WI","wyoming":"WY",
+ "district of columbia":"DC","washington dc":"DC","washington d.c.":"DC",
+}
+VALID_ST = set(STATE_ABBR.values())
+
+# Names that are both a city and a state, plus common shorthand. Without these,
+# a bare "New York" resolves to the state and the city is lost.
+ALIAS = {
+ "new york": ("New York", "NY"), "nyc": ("New York", "NY"),
+ "new york city": ("New York", "NY"), "manhattan": ("New York", "NY"),
+ "washington": ("Washington", "DC"), "washington dc": ("Washington", "DC"),
+ "washington d.c.": ("Washington", "DC"), "dc": ("Washington", "DC"),
+ "sf": ("San Francisco", "CA"), "san francisco bay area": ("San Francisco", "CA"),
+ "bay area": ("San Francisco", "CA"), "sf bay area": ("San Francisco", "CA"),
+ "la": ("Los Angeles", "CA"), "nj": ("Newark", "NJ"),
+ "greater boston": ("Boston", "MA"), "greater seattle area": ("Seattle", "WA"),
+}
+
+# Multi-location postings list several sites. Take the first, ignore the rest.
+SPLIT = re.compile(r"\s*(?:;|\||/|\bor\b|\band\b)\s*", re.I)
+STRIP = re.compile(r"^\s*(remote|hybrid|onsite|on-site|in office)\s*[-,:]?\s*", re.I)
+
 
 def geocode(place):
+    """Parse 'City, ST' out of a messy ATS location string. None if unresolvable."""
     if not place:
         return None
-    key = place.lower().strip()
-    if key in _cache:
-        return _cache[key]
-    r = requests.get("https://nominatim.openstreetmap.org/search",
-                     params={"q": place, "countrycodes": COUNTRY, "format": "json",
-                             "limit": 1, "addressdetails": 1},
-                     headers={"User-Agent": "sponsormap/2.0"}, timeout=25)
-    time.sleep(1.1)
-    js = r.json()
-    if not js:
-        _cache[key] = None
-    else:
-        a = js[0].get("address", {})
-        _cache[key] = {"lat": float(js[0]["lat"]), "lng": float(js[0]["lon"]),
-                       "city": a.get("city") or a.get("town") or a.get("village") or "",
-                       "st": a.get("ISO3166-2-lvl4", "--").split("-")[-1],
-                       "zip": a.get("postcode", "")}
-    return _cache[key]
+    raw = SPLIT.split(place.strip())[0]
+    raw = STRIP.sub("", raw).strip(" ,-")
+    if not raw or re.fullmatch(r"(usa?|united states|remote|anywhere|multiple locations)", raw, re.I):
+        return None
+
+    if raw.lower() in ALIAS:
+        city, state = ALIAS[raw.lower()]
+        lat, lng = _geo["cities"].get(f"{city.lower()}|{state}", _geo["states"].get(state, (0, 0)))
+        return {"lat": lat, "lng": lng, "city": city, "st": state, "zip": ""}
+
+    parts = [p.strip() for p in raw.split(",") if p.strip()]
+    city = state = ""
+
+    for p in reversed(parts):                       # state is usually last
+        u = p.upper()
+        if u in VALID_ST:
+            state = u; break
+        if p.lower() in STATE_ABBR:
+            state = STATE_ABBR[p.lower()]; break
+    if parts:
+        cand = parts[0]
+        if cand.lower() in ALIAS:
+            city, state = ALIAS[cand.lower()]
+        elif cand.upper() not in VALID_ST and cand.lower() not in STATE_ABBR:
+            city = cand
+
+    if not state:
+        return None                                 # no state, no pin
+
+    key = f"{city.lower()}|{state}"
+    if city and key in _geo["cities"]:
+        lat, lng = _geo["cities"][key]
+        return {"lat": lat, "lng": lng, "city": city.title(), "st": state, "zip": ""}
+    if state in _geo["states"]:                     # known state, unknown town
+        lat, lng = _geo["states"][state]
+        return {"lat": lat, "lng": lng, "city": city.title(), "st": state, "zip": ""}
+    return None
 
 
 # ============================================================ SPONSORSHIP
@@ -217,6 +274,34 @@ def norm_employer(name):
     s = re.sub(r"[^a-z0-9 ]", " ", s)
     s = re.sub(r"\b(inc|llc|corp|corporation|co|ltd|lp|holdings|usa|technologies|technology|labs)\b", " ", s)
     return re.sub(r"\s+", "", s)
+
+
+SPONSORS = "data/sponsors.json"
+
+
+def build_sponsors(paths, out=SPONSORS):
+    """
+    Collapse the huge quarterly LCA files into one small {employer: filings} map.
+    Run this locally whenever new DOL data drops, then commit the result.
+    Raw LCA CSVs stay out of the repo; this file is a few hundred KB.
+    """
+    counts = load_sponsors(paths)
+    counts = {k: v for k, v in counts.items() if v >= 2}   # drop one-off filings
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    json.dump(counts, open(out, "w"))
+    print(f"wrote {len(counts):,} employers -> {out}")
+    return counts
+
+
+def read_sponsors(path=SPONSORS):
+    """Load the precomputed map. Missing file is fine, sponsorship just shows 0."""
+    if os.path.exists(path):
+        d = json.load(open(path))
+        print(f"sponsorship data: {len(d):,} employers")
+        return d
+    print("no data/sponsors.json, sponsorship will show as 0 "
+          "(run --build-sponsors once to create it)")
+    return {}
 
 
 def load_sponsors(paths, country=COUNTRY):
@@ -344,9 +429,15 @@ def main():
     ap.add_argument("--max-age", type=int, default=30)
     ap.add_argument("--no-phd", action="store_true")
     ap.add_argument("--review", action="store_true")
+    ap.add_argument("--build-sponsors", nargs="*", metavar="CSV",
+                    help="collapse LCA files into data/sponsors.json, then exit")
     args = ap.parse_args()
 
-    sponsors = load_sponsors(args.lca) if args.lca else {}
+    if args.build_sponsors is not None:
+        build_sponsors(args.build_sponsors or args.lca)
+        return
+
+    sponsors = load_sponsors(args.lca) if args.lca else read_sponsors()
     cutoff = datetime.now(timezone.utc) - timedelta(days=args.max_age)
     rows, seen, dropped = [], set(), Counter()
 
@@ -394,7 +485,6 @@ def main():
             kept += 1
         print(f"  {slug:<18} {kept:>3} kept / {len(postings)} total")
 
-    json.dump(_cache, open(CACHE, "w"))
 
     if args.review:
         print("\nUnmatched titles worth adding to the taxonomy:")
@@ -404,9 +494,28 @@ def main():
 
     print(f"\ndropped: {dict(dropped)}")
     print(f"review queue: {len(review_queue)} unmatched titles (run --review)")
+    if os.path.exists(args.out):
+        try:
+            prev = json.load(open(args.out))
+            if len(prev) > 20 and len(rows) < 0.5 * len(prev):
+                print(f"ABORT: {len(rows)} rows vs {len(prev)} yesterday. "
+                      f"Looks like a broken fetch, refusing to overwrite.", file=sys.stderr)
+                sys.exit(1)
+        except (ValueError, OSError):
+            pass
+
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     json.dump(rows, open(args.out, "w"), indent=1)
     print(f"wrote {len(rows)} roles -> {args.out}")
+
+    meta = {
+        "updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "roles": len(rows),
+        "employers": len({r["co"] for r in rows}),
+        "sponsors_loaded": len(sponsors),
+    }
+    json.dump(meta, open(os.path.join(os.path.dirname(args.out) or ".", "meta.json"), "w"), indent=1)
+    print(f'stamped {meta["updated"]}')
 
     hist = update_history(rows)
     watch = build_watchlist(rows, hist, ADJACENCY)
