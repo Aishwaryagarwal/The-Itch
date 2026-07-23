@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NextGig, a live map of sponsoring employers</title>
+<meta name="description" content="Live map of data, AI and analytics engineering roles at employers with a visa sponsorship record.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><circle cx=%2216%22 cy=%2216%22 r=%2213%22 fill=%22%233B6FF5%22 stroke=%22%230FA26B%22 stroke-width=%223%22/></svg>">
+<style>
+  html,body{margin:0;padding:0;background:#EDF1F8;font-family:'Inter',system-ui,sans-serif}
+  .shell{max-width:1440px;margin:0 auto;padding:22px 22px 34px}
+  .kicker{max-width:1440px;margin:0 auto;padding:0 4px 12px;color:#6B7B95;font-size:12.5px;line-height:1.6}
+  .kicker a{color:#3B6FF5}
+  @media(max-width:900px){.shell{padding:12px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#F4F7FC; --card:#FFFFFF; --line:#E3E9F2; --line2:#D3DCE9;
+  --ink:#16233A; --text:#2C3A52; --muted:#6B7B95;
+  --signal:#3B6FF5; --signal-soft:#EAF0FE;
+  --sponsor:#0FA26B; --sponsor-soft:#E6F7F0;
+  --pay:#B4700A; --pay-soft:#FDF3E2;
+  --warn:#D93E5C; --warn-soft:#FDEDF0;
+  --shadow:0 1px 2px rgba(22,35,58,.05),0 4px 14px rgba(22,35,58,.06);
+}
+*{box-sizing:border-box}
+#app{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--paper);
+  border-radius:12px;overflow:hidden;display:flex;flex-direction:column;height:780px;
+  border:1px solid var(--line)}
+
+.hdr{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;
+  gap:13px;flex-wrap:wrap;background:linear-gradient(180deg,#FFFFFF 0%,#FAFCFF 100%)}
+.hdr h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;margin:0;
+  letter-spacing:-.025em;color:var(--ink)}
+.hdr h1 span{color:var(--signal)}
+.tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);background:var(--paper);border:1px solid var(--line);padding:3px 8px;border-radius:20px}
+.count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--signal);margin-left:auto;font-weight:600}
+
+.tabs{display:flex;border-bottom:1px solid var(--line);padding:0 20px;background:var(--card)}
+.tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  padding:10px 14px;cursor:pointer;transition:color .12s}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--signal);border-bottom-color:var(--signal)}
+
+.body{display:flex;flex:1;min-height:0}
+.filters{width:242px;flex-shrink:0;border-right:1px solid var(--line);padding:16px;
+  overflow-y:auto;background:var(--card)}
+.filters label{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.filters label:first-child{margin-top:0}
+select,input[type=text],input[type=number]{width:100%;background:var(--card);color:var(--ink);
+  border:1px solid var(--line2);border-radius:7px;padding:8px 9px;font-family:'Inter',sans-serif;font-size:13px;
+  transition:border-color .12s}
+select:hover,input:hover{border-color:var(--muted)}
+select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 0 3px var(--signal-soft)}
+.chk{display:flex;align-items:center;gap:9px;margin-top:9px;font-size:12.5px;cursor:pointer;
+  line-height:1.35;color:var(--text)}
+.chk input{accent-color:var(--sponsor);width:15px;height:15px;flex-shrink:0}
+.reset{margin-top:17px;width:100%;background:var(--paper);border:1px solid var(--line2);color:var(--muted);
+  padding:9px;border-radius:7px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500}
+.reset:hover{border-color:var(--signal);color:var(--signal);background:var(--signal-soft)}
+
+.mapwrap{flex:1;min-width:0;position:relative;background:#EEF2F8}
+#map{position:absolute;inset:0}
+
+.mapctl{position:absolute;top:12px;right:12px;z-index:600;display:flex;gap:5px}
+.mapctl button{background:rgba(255,255,255,.95);border:1px solid var(--line2);color:var(--muted);
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  padding:7px 10px;border-radius:6px;cursor:pointer;box-shadow:var(--shadow);backdrop-filter:blur(6px);font-weight:600}
+.mapctl button:hover{color:var(--ink);border-color:var(--muted)}
+.mapctl button.on{color:var(--signal);border-color:var(--signal);background:var(--signal-soft)}
+
+.legend{position:absolute;left:12px;bottom:12px;z-index:600;background:rgba(255,255,255,.96);
+  border:1px solid var(--line2);border-radius:9px;padding:10px 13px;box-shadow:var(--shadow);backdrop-filter:blur(6px)}
+.legend h4{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);font-weight:600}
+.legend div{display:flex;align-items:center;gap:8px;font-size:11.5px;margin-top:5px;color:var(--text)}
+.legend b{width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0}
+
+.list{width:326px;flex-shrink:0;border-left:1px solid var(--line);overflow-y:auto;background:var(--paper)}
+.card{padding:12px 15px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s;
+  background:var(--card)}
+.card:hover{background:#FAFCFF}
+.card.on{background:var(--signal-soft);box-shadow:inset 3px 0 0 var(--signal)}
+.card h3 a{color:inherit;text-decoration:none}
+.card h3 a:hover{color:var(--signal);text-decoration:underline}
+.card h3{font-family:'Space Grotesk',sans-serif;font-size:13.5px;margin:0 0 3px;font-weight:500;
+  line-height:1.3;color:var(--ink)}
+.co{font-size:12.5px;color:var(--signal);font-weight:600}
+.meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px}
+.pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.pill{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:3px 7px;border-radius:20px;
+  border:1px solid var(--line2);color:var(--muted);background:var(--paper);font-weight:600}
+.pill.pay{color:var(--pay);border-color:#F0DFC0;background:var(--pay-soft)}
+.pill.spon{color:var(--sponsor);border-color:#BCE6D5;background:var(--sponsor-soft)}
+.pill.nospon{color:var(--warn);border-color:#F5CBD4;background:var(--warn-soft)}
+.pill.fresh{color:var(--signal);border-color:#C3D6FC;background:var(--signal-soft)}
+.meter{display:flex;gap:2px;margin-top:8px}
+.meter i{height:4px;flex:1;background:var(--line);border-radius:3px}
+.meter i.f{background:var(--sponsor)}
+.empty{padding:28px 18px;color:var(--muted);font-size:13px;line-height:1.6}
+
+/* markers */
+.pin{background:none!important;border:none!important}
+.pin b{display:flex;align-items:center;justify-content:center;width:100%;height:100%;
+  border-radius:50%;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  color:#fff;background:var(--signal);border:2.5px solid var(--sponsor);
+  box-shadow:0 0 0 3px rgba(255,255,255,.95),0 3px 10px rgba(22,35,58,.22);cursor:pointer;
+  transition:transform .12s}
+.pin b:hover{transform:scale(1.12)}
+.pin.no b{border-color:var(--warn)}
+.clus{background:none!important;border:none!important}
+.clus b{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--signal);
+  background:rgba(255,255,255,.92);border:2.5px solid var(--signal);
+  box-shadow:0 0 0 6px rgba(59,111,245,.13),0 3px 12px rgba(22,35,58,.16)}
+
+.leaflet-popup-content-wrapper{background:var(--card);color:var(--text);border-radius:10px;
+  border:1px solid var(--line2);box-shadow:0 10px 34px rgba(22,35,58,.16)}
+.leaflet-popup-tip{background:var(--card);border:1px solid var(--line2)}
+.leaflet-popup-content{margin:12px 14px;font-family:'Inter',sans-serif;font-size:12.5px;min-width:212px}
+.leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
+.pop h5{font-family:'Space Grotesk',sans-serif;font-size:14.5px;margin:0 0 2px;color:var(--ink)}
+.pop .ps{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:8px}
+.pop ul{list-style:none;margin:0;padding:0;max-height:152px;overflow-y:auto}
+.pop li{padding:6px 0;border-top:1px solid var(--line);font-size:12px;line-height:1.35;color:var(--ink)}
+.pop li span{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);display:block;margin-top:3px}
+.leaflet-tooltip.tt{background:var(--ink);border:none;color:#fff;font-family:'JetBrains Mono',monospace;
+  font-size:10.5px;box-shadow:0 3px 10px rgba(22,35,58,.25);border-radius:5px;padding:4px 8px}
+.leaflet-tooltip.tt:before{border-top-color:var(--ink)}
+
+/* watch tab */
+.watch{flex:1;overflow-y:auto;padding:18px 20px;min-height:0;background:var(--paper)}
+.watch-head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.watch-head p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6;max-width:540px}
+.watch-filters{display:flex;gap:8px;margin-left:auto}
+.watch-filters select{width:auto;min-width:130px}
+.whdr,.wrow{display:grid;grid-template-columns:1.5fr .9fr 1.3fr 104px 88px;gap:14px}
+.whdr{padding:0 14px 8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);font-weight:600}
+.whdr span:nth-child(4),.whdr span:nth-child(5){text-align:right}
+.wrow{align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:9px;
+  margin-bottom:8px;background:var(--card);box-shadow:var(--shadow);transition:border-color .12s}
+.wrow:hover{border-color:var(--signal)}
+.wname{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:500;color:var(--ink)}
+.wsub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px}
+.wwhy{font-size:12px;line-height:1.45;color:var(--text)}
+.wcad{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);text-align:right}
+.wheat{display:flex;gap:2px;justify-content:flex-end}
+.wheat i{width:8px;height:16px;border-radius:3px;background:var(--line)}
+.wheat i.f{background:var(--sponsor)}
+
+.note{padding:10px 20px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);background:var(--card)}
+.note code{background:var(--paper);border:1px solid var(--line);padding:1px 5px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;font-size:10px}
+@media(max-width:900px){
+  .body{flex-direction:column}
+  .filters,.list{width:100%;max-height:190px;border:none;border-bottom:1px solid var(--line)}
+  .mapwrap{height:290px;flex:none}
+  .whdr{display:none}.wrow{grid-template-columns:1fr 1fr}
+}
+</style>
+
+<div id="app">
+  <div class="hdr">
+    <h1>Next<span>Gig</span></h1>
+    <span class="tag">data, ai and analytics engineering</span>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-view="jobs">Open roles</button>
+    <button class="tab" data-view="watch">Worth watching</button>
+  </div>
+
+  <div class="body" id="view-jobs">
+    <div class="filters">
+      <label>State</label><select id="f-state"><option value="">All states</option></select>
+      <label>City</label><select id="f-city"><option value="">All cities</option></select>
+      <label>Title contains</label><input type="text" id="f-title" placeholder="e.g. analytics, platform">
+      <label>Level</label><select id="f-level"><option value="">Any level</option></select>
+      <label>Work setup</label><select id="f-type"><option value="">Any setup</option></select>
+      <label>Minimum base ($k)</label><input type="number" id="f-pay" placeholder="e.g. 150" step="10">
+      <label>Posted within</label>
+      <select id="f-age">
+        <option value="30">Last 30 days</option><option value="7">Last 7 days</option>
+        <option value="14">Last 14 days</option><option value="60">Last 60 days</option>
+      </select>
+      <label>Requirements</label>
+      <div class="chk"><input type="checkbox" id="f-phd" checked><span>Hide PhD-required roles</span></div>
+      <div class="chk"><input type="checkbox" id="f-spon"><span>Only employers with H-1B record</span></div>
+      <button class="reset" id="reset">Clear all filters</button>
+    </div>
+
+    <div class="mapwrap">
+      <div id="map"></div>
+      <div class="mapctl">
+        <button id="v-pins" class="on">Pins</button>
+        <button id="v-heat">Density</button>
+        <button id="v-fit">Fit</button>
+      </div>
+      <div class="legend">
+        <h4>Marker ring</h4>
+        <div><b style="background:var(--signal);border:2px solid var(--sponsor)"></b>Sponsors (H-1B record)</div>
+        <div><b style="background:var(--signal);border:2px solid var(--warn)"></b>No filing record</div>
+        <div style="margin-top:6px;font-size:10px;opacity:.75">Number = open roles at that site</div>
+      </div>
+    </div>
+
+    <div class="list" id="list"></div>
+  </div>
+
+  <div class="watch" id="view-watch" hidden>
+    <div class="watch-head">
+      <p>Employers with a sponsorship record and a data org, but nothing matching your filters open
+      right now. Ranked by how close they are to their normal posting cadence.</p>
+      <div class="watch-filters">
+        <select id="w-state"><option value="">All states</option></select>
+        <select id="w-why"><option value="">Any reason</option></select>
+      </div>
+    </div>
+    <div id="watch-list"></div>
+  </div>
+
+  <div class="note"><span id="src-note">Loading</span></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+<script>
+const JOBS = [
+ {co:"Snowflake",title:"Analytics Engineer, Growth",city:"San Mateo",st:"CA",zip:"94402",lat:37.563,lng:-122.325,lvl:"Mid",type:"Hybrid",min:158,max:205,lca:412,src:"Greenhouse",age:17,deg:"none"},
+ {co:"Databricks",title:"Staff Data Engineer, Platform",city:"San Francisco",st:"CA",zip:"94105",lat:37.789,lng:-122.396,lvl:"Staff",type:"Hybrid",min:210,max:280,lca:521,src:"Greenhouse",age:21,deg:"masters"},
+ {co:"Stripe",title:"Engineering Manager, Data Platform",city:"South San Francisco",st:"CA",zip:"94080",lat:37.655,lng:-122.408,lvl:"Manager",type:"Hybrid",min:245,max:310,lca:388,src:"Greenhouse",age:3,deg:"phd"},
+ {co:"Sigma Computing",title:"Data Engineer",city:"San Francisco",st:"CA",zip:"94107",lat:37.775,lng:-122.401,lvl:"Mid",type:"Hybrid",min:150,max:190,lca:34,src:"Lever",age:5,deg:"bachelors"},
+ {co:"Cribl",title:"Senior Analytics Engineer",city:"San Francisco",st:"CA",zip:"94104",lat:37.791,lng:-122.402,lvl:"Senior",type:"Remote",min:165,max:200,lca:21,src:"Greenhouse",age:2,deg:"none"},
+ {co:"Nvidia",title:"Senior Data Engineer, AI Infra",city:"Santa Clara",st:"CA",zip:"95051",lat:37.354,lng:-121.955,lvl:"Senior",type:"Onsite",min:185,max:240,lca:1140,src:"Workday",age:9,deg:"bachelors"},
+ {co:"Rivian",title:"Manager, Data Engineering",city:"Palo Alto",st:"CA",zip:"94304",lat:37.444,lng:-122.163,lvl:"Manager",type:"Hybrid",min:200,max:255,lca:196,src:"Greenhouse",age:24,deg:"bachelors"},
+ {co:"Chime",title:"Analytics Engineer, Risk",city:"San Francisco",st:"CA",zip:"94103",lat:37.773,lng:-122.414,lvl:"Mid",type:"Remote",min:145,max:180,lca:63,src:"Greenhouse",age:11,deg:"bachelors"},
+ {co:"Datadog",title:"Data Engineer, Observability",city:"New York",st:"NY",zip:"10001",lat:40.750,lng:-73.997,lvl:"Mid",type:"Hybrid",min:155,max:195,lca:302,src:"Greenhouse",age:24,deg:"bachelors"},
+ {co:"Ramp",title:"Analytics Engineering Lead",city:"New York",st:"NY",zip:"10011",lat:40.741,lng:-73.994,lvl:"Lead",type:"Onsite",min:190,max:240,lca:47,src:"Ashby",age:55,deg:"bachelors"},
+ {co:"Peloton",title:"Senior Analytics Engineer",city:"New York",st:"NY",zip:"10001",lat:40.752,lng:-73.993,lvl:"Senior",type:"Hybrid",min:160,max:195,lca:58,src:"Greenhouse",age:11,deg:"masters"},
+ {co:"Two Sigma",title:"Data Platform Engineer",city:"New York",st:"NY",zip:"10013",lat:40.720,lng:-74.006,lvl:"Mid",type:"Onsite",min:200,max:260,lca:274,src:"Greenhouse",age:55,deg:"none"},
+ {co:"Spotify",title:"Engineering Manager, Data",city:"New York",st:"NY",zip:"10007",lat:40.713,lng:-74.013,lvl:"Manager",type:"Hybrid",min:215,max:270,lca:181,src:"Lever",age:55,deg:"masters"},
+ {co:"Amazon",title:"Data Engineer II, Retail Analytics",city:"Seattle",st:"WA",zip:"98109",lat:47.622,lng:-122.337,lvl:"Mid",type:"Onsite",min:145,max:185,lca:4820,src:"Workday",age:2,deg:"none"},
+ {co:"Microsoft",title:"Principal Data Engineering Manager",city:"Redmond",st:"WA",zip:"98052",lat:47.674,lng:-122.121,lvl:"Manager",type:"Hybrid",min:210,max:275,lca:3915,src:"Workday",age:2,deg:"masters"},
+ {co:"Zillow",title:"Senior Analytics Engineer",city:"Seattle",st:"WA",zip:"98104",lat:47.603,lng:-122.331,lvl:"Senior",type:"Remote",min:160,max:200,lca:112,src:"Greenhouse",age:6,deg:"bachelors"},
+ {co:"Remitly",title:"Data Engineer, Payments",city:"Seattle",st:"WA",zip:"98121",lat:47.615,lng:-122.343,lvl:"Mid",type:"Hybrid",min:140,max:175,lca:88,src:"Greenhouse",age:6,deg:"masters"},
+ {co:"Indeed",title:"Analytics Engineer",city:"Austin",st:"TX",zip:"78701",lat:30.267,lng:-97.743,lvl:"Mid",type:"Hybrid",min:135,max:170,lca:246,src:"Greenhouse",age:55,deg:"bachelors"},
+ {co:"Tesla",title:"Data Engineer, Manufacturing",city:"Austin",st:"TX",zip:"78725",lat:30.223,lng:-97.618,lvl:"Mid",type:"Onsite",min:140,max:180,lca:892,src:"Workday",age:8,deg:"bachelors"},
+ {co:"Capital One",title:"Manager, Data Engineering",city:"Plano",st:"TX",zip:"75024",lat:33.078,lng:-96.806,lvl:"Manager",type:"Hybrid",min:175,max:220,lca:1630,src:"Workday",age:55,deg:"masters"},
+ {co:"USAA",title:"Lead Data Engineer",city:"San Antonio",st:"TX",zip:"78288",lat:29.514,lng:-98.573,lvl:"Lead",type:"Hybrid",min:150,max:185,lca:0,src:"Workday",age:19,deg:"bachelors"},
+ {co:"Wayfair",title:"Analytics Engineering Manager",city:"Boston",st:"MA",zip:"02116",lat:42.349,lng:-71.077,lvl:"Manager",type:"Hybrid",min:180,max:225,lca:407,src:"Greenhouse",age:3,deg:"masters"},
+ {co:"Klaviyo",title:"Senior Data Engineer",city:"Boston",st:"MA",zip:"02110",lat:42.356,lng:-71.052,lvl:"Senior",type:"Hybrid",min:170,max:210,lca:64,src:"Greenhouse",age:9,deg:"bachelors"},
+ {co:"Moderna",title:"Data Engineer, Research Platform",city:"Cambridge",st:"MA",zip:"02139",lat:42.363,lng:-71.087,lvl:"Mid",type:"Onsite",min:140,max:175,lca:139,src:"Workday",age:41,deg:"bachelors"},
+ {co:"Grainger",title:"Manager, Data & Analytics",city:"Chicago",st:"IL",zip:"60606",lat:41.884,lng:-87.638,lvl:"Manager",type:"Hybrid",min:160,max:200,lca:71,src:"Workday",age:17,deg:"bachelors"},
+ {co:"Cars.com",title:"Analytics Engineer",city:"Chicago",st:"IL",zip:"60654",lat:41.890,lng:-87.633,lvl:"Mid",type:"Remote",min:125,max:160,lca:29,src:"Greenhouse",age:26,deg:"bachelors"},
+ {co:"John Deere",title:"Data Engineer, Precision Ag",city:"Moline",st:"IL",zip:"61265",lat:41.507,lng:-90.515,lvl:"Mid",type:"Onsite",min:120,max:155,lca:203,src:"Workday",age:11,deg:"phd"},
+ {co:"Delta Air Lines",title:"Senior Analytics Engineer",city:"Atlanta",st:"GA",zip:"30354",lat:33.649,lng:-84.428,lvl:"Senior",type:"Hybrid",min:140,max:175,lca:118,src:"Workday",age:11,deg:"bachelors"},
+ {co:"NCR Voyix",title:"Data Engineering Manager",city:"Atlanta",st:"GA",zip:"30308",lat:33.771,lng:-84.386,lvl:"Manager",type:"Hybrid",min:155,max:190,lca:242,src:"Workday",age:14,deg:"masters"},
+ {co:"Optum",title:"Lead Data Engineer, Clinical",city:"Minneapolis",st:"MN",zip:"55402",lat:44.977,lng:-93.271,lvl:"Lead",type:"Remote",min:145,max:180,lca:1105,src:"Workday",age:17,deg:"masters"},
+ {co:"Target",title:"Senior Data Engineer",city:"Minneapolis",st:"MN",zip:"55403",lat:44.972,lng:-93.276,lvl:"Senior",type:"Hybrid",min:150,max:185,lca:512,src:"Workday",age:14,deg:"masters"},
+ {co:"Duolingo",title:"Analytics Engineer",city:"Pittsburgh",st:"PA",zip:"15206",lat:40.464,lng:-79.925,lvl:"Mid",type:"Hybrid",min:140,max:175,lca:56,src:"Greenhouse",age:3,deg:"bachelors"},
+ {co:"Comcast",title:"Manager, Data Platform",city:"Philadelphia",st:"PA",zip:"19103",lat:39.954,lng:-75.169,lvl:"Manager",type:"Hybrid",min:165,max:205,lca:698,src:"Workday",age:24,deg:"bachelors"},
+ {co:"Cloudflare",title:"Data Engineer, Analytics",city:"Denver",st:"CO",zip:"80202",lat:39.749,lng:-104.996,lvl:"Mid",type:"Hybrid",min:145,max:185,lca:187,src:"Greenhouse",age:17,deg:"bachelors"},
+ {co:"Palantir",title:"Data Engineer, Deployment Strategy",city:"Denver",st:"CO",zip:"80202",lat:39.744,lng:-104.989,lvl:"Mid",type:"Onsite",min:160,max:205,lca:263,src:"Lever",age:28,deg:"bachelors"},
+ {co:"Carvana",title:"Senior Analytics Engineer",city:"Tempe",st:"AZ",zip:"85281",lat:33.426,lng:-111.940,lvl:"Senior",type:"Hybrid",min:140,max:175,lca:74,src:"Greenhouse",age:3,deg:"phd"},
+ {co:"Nationwide",title:"Data Engineering Lead",city:"Columbus",st:"OH",zip:"43215",lat:39.962,lng:-83.001,lvl:"Lead",type:"Hybrid",min:135,max:170,lca:161,src:"Workday",age:55,deg:"phd"},
+ {co:"Epic Systems",title:"Data Platform Engineer",city:"Verona",st:"WI",zip:"53593",lat:42.990,lng:-89.540,lvl:"Mid",type:"Onsite",min:130,max:165,lca:389,src:"Workday",age:17,deg:"bachelors"},
+{co:"Databricks",title:"Analytics Engineer, Finance Systems",city:"San Francisco",st:"CA",zip:"94105",lat:37.789,lng:-122.396,lvl:"Mid",type:"Hybrid",min:160,max:200,lca:521,src:"Greenhouse",age:4,deg:"bachelors"},
+ {co:"Databricks",title:"Data Engineering Manager, Lakehouse",city:"San Francisco",st:"CA",zip:"94105",lat:37.789,lng:-122.396,lvl:"Manager",type:"Hybrid",min:230,max:290,lca:521,src:"Greenhouse",age:9,deg:"bachelors"},
+ {co:"Datadog",title:"Forward Deployed Engineer, Data",city:"New York",st:"NY",zip:"10001",lat:40.750,lng:-73.997,lvl:"Senior",type:"Hybrid",min:175,max:215,lca:302,src:"Greenhouse",age:2,deg:"bachelors"},
+ {co:"Datadog",title:"Analytics Engineering Manager",city:"New York",st:"NY",zip:"10001",lat:40.750,lng:-73.997,lvl:"Manager",type:"Hybrid",min:205,max:255,lca:302,src:"Greenhouse",age:11,deg:"masters"},
+ {co:"Bosch Rexroth",title:"Data Engineering Manager, Fluid Power",city:"Plymouth",st:"MI",zip:"48170",lat:42.371,lng:-83.470,lvl:"Manager",type:"Onsite",min:145,max:180,lca:14,src:"Workday",age:6,deg:"bachelors"},
+ {co:"Altair Engineering",title:"Senior Data Scientist, Simulation",city:"Troy",st:"MI",zip:"48083",lat:42.579,lng:-83.143,lvl:"Senior",type:"Hybrid",min:135,max:170,lca:42,src:"Workday",age:13,deg:"masters"},
+ {co:"Stryker",title:"Data Engineer, Manufacturing Analytics",city:"Kalamazoo",st:"MI",zip:"49002",lat:42.245,lng:-85.549,lvl:"Mid",type:"Onsite",min:120,max:155,lca:63,src:"Workday",age:8,deg:"bachelors"},
+ {co:"Detroit Diesel Reman",title:"Database Architect, Service Ops",city:"Canton",st:"MI",zip:"48187",lat:42.308,lng:-83.482,lvl:"Senior",type:"Onsite",min:125,max:160,lca:11,src:"Workable",age:19,deg:"bachelors"}
+];
+
+const WATCH = [
+ {co:"Uptake",city:"Chicago",st:"IL",lca:37,why:"Predictive maintenance for industrial fleets, a direct domain match",cad:"~14 wk cadence",quiet:58,tag:"adjacent"},
+ {co:"Cognite",city:"Austin",st:"TX",lca:26,why:"Industrial DataOps, near-identical problem space",cad:"~13 wk cadence",quiet:47,tag:"adjacent"},
+ {co:"Samsara",city:"San Francisco",st:"CA",lca:156,why:"Industrial IoT telemetry, closest adjacency to your domain",cad:"~6 wk cadence",quiet:64,tag:"adjacent"},
+ {co:"ServiceTitan",city:"Glendale",st:"CA",lca:64,why:"Field service management SaaS, your industry productized",cad:"~8 wk cadence",quiet:29,tag:"adjacent"},
+ {co:"Augury",city:"New York",st:"NY",lca:19,why:"Machine health monitoring; Series E, building analytics team",cad:"~12 wk cadence",quiet:35,tag:"funding"},
+ {co:"Xylem",city:"Washington",st:"DC",lca:88,why:"Water infrastructure telemetry, industrial repair adjacency",cad:"~12 wk cadence",quiet:52,tag:"adjacent"},
+ {co:"Vesco Oil Corporation",city:"Southfield",st:"MI",lca:5,why:"Posted 4 matching roles historically; quiet since spring",cad:"~16 wk cadence",quiet:71,tag:"cadence"},
+ {co:"Great Lakes Fluid Power",city:"Grand Rapids",st:"MI",lca:6,why:"Fluid power sector; small but consistent sponsor",cad:"~15 wk cadence",quiet:44,tag:"adjacent"},
+ {co:"Blue Yonder",city:"Scottsdale",st:"AZ",lca:311,why:"Supply chain AI; heavy sponsor, low public profile",cad:"~6 wk cadence",quiet:21,tag:"cadence"},
+ {co:"Instacart",city:"San Francisco",st:"CA",lca:342,why:"Strong sponsor, analytics org paused since Q1",cad:"~7 wk cadence",quiet:41,tag:"cadence"},
+ {co:"Fivetran",city:"Oakland",st:"CA",lca:94,why:"Core pipeline vendor; posts analytics eng in bursts",cad:"~9 wk cadence",quiet:27,tag:"cadence"},
+ {co:"dbt Labs",city:"Philadelphia",st:"PA",lca:31,why:"Your exact toolchain; small but consistent sponsor",cad:"~11 wk cadence",quiet:38,tag:"adjacent"},
+ {co:"Sierra AI",city:"San Francisco",st:"CA",lca:12,why:"Forward-deployed engineering model; early sponsor record",cad:"~9 wk cadence",quiet:18,tag:"signal"},
+ {co:"Vercel",city:"San Francisco",st:"CA",lca:42,why:"New data team formed; first two hires filed H-1B",cad:"~10 wk cadence",quiet:16,tag:"signal"},
+ {co:"Applied Intuition",city:"Mountain View",st:"CA",lca:97,why:"Raised at $15B; infra hiring expected to resume",cad:"~7 wk cadence",quiet:24,tag:"funding"},
+ {co:"Grafana Labs",city:"New York",st:"NY",lca:23,why:"Observability data; remote-friendly and sponsors",cad:"~11 wk cadence",quiet:33,tag:"signal"}
+];
+const TAGS={cadence:"Posts regularly, quiet now",funding:"Recent raise",adjacent:"Domain adjacency",signal:"Team-building signal"};
+
+const $=id=>document.getElementById(id);
+const conf=n=>n===0?0:n<25?1:n<100?2:n<400?3:4;
+const fill=(el,v)=>v.forEach(x=>el.insertAdjacentHTML('beforeend',`<option>${x}</option>`));
+
+function rebuildOptions(){
+  $('f-state').innerHTML='<option value="">All states</option>';
+  $('f-level').innerHTML='<option value="">Any level</option>';
+  $('f-type').innerHTML='<option value="">Any setup</option>';
+  $('w-state').innerHTML='<option value="">All states</option>';
+  fill($('f-state'),[...new Set(JOBS.map(j=>j.st))].filter(Boolean).sort());
+  fill($('f-level'),["Mid","Senior","Staff","Lead","Manager","Director"]);
+  fill($('f-type'),[...new Set(JOBS.map(j=>j.type))].filter(Boolean).sort());
+  fill($('w-state'),[...new Set(WATCH.map(w=>w.st))].filter(Boolean).sort());
+}
+
+const map=L.map('map',{zoomControl:true,attributionControl:false,worldCopyJump:true}).setView([39.5,-96],4);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
+  {maxZoom:19,opacity:.85}).addTo(map);
+
+// cluster layer , collapses the SF/NYC pileups that made v1 unreadable
+const cluster=L.markerClusterGroup({
+  showCoverageOnHover:false, maxClusterRadius:46, spiderfyDistanceMultiplier:1.4,
+  iconCreateFunction:c=>{
+    const n=c.getAllChildMarkers().reduce((s,m)=>s+m.options.n,0);
+    const d=n<10?38:n<40?46:54;
+    return L.divIcon({className:'clus',html:`<b>${n}</b>`,iconSize:[d,d]});
+  }
+});
+let heat=null, mode='pins', sites=[], sel=null;
+
+function cityOptions(st){
+  const s=$('f-city'),cur=s.value;
+  s.innerHTML='<option value="">All cities</option>';
+  const c=[...new Set(JOBS.filter(j=>!st||j.st===st).map(j=>j.city))].sort();
+  fill(s,c); if(c.includes(cur)) s.value=cur;
+}
+
+function matches(j){
+  const st=$('f-state').value,city=$('f-city').value,t=$('f-title').value.trim().toLowerCase();
+  const lv=$('f-level').value,ty=$('f-type').value,pay=parseFloat($('f-pay').value);
+  if(st&&j.st!==st) return false;
+  if(city&&j.city!==city) return false;
+  if(t&&!(j.title+' '+j.co).toLowerCase().includes(t)) return false;
+  if(lv&&j.lvl!==lv) return false;
+  if(ty&&j.type!==ty) return false;
+  if(!isNaN(pay)&&(!j.max||j.max<pay)) return false;
+  if(j.age>+$('f-age').value) return false;
+  if($('f-phd').checked&&j.deg==='phd') return false;
+  if($('f-spon').checked&&j.lca===0) return false;
+  return true;
+}
+
+// one marker per employer SITE, not per posting , three roles at one office
+// is one pin showing "3", which is what you actually want to see
+function groupSites(rows){
+  const m=new Map();
+  rows.forEach(j=>{
+    const k=`${j.co}|${j.lat}|${j.lng}`;
+    if(!m.has(k)) m.set(k,{co:j.co,city:j.city,st:j.st,lat:j.lat,lng:j.lng,lca:j.lca,jobs:[]});
+    m.get(k).jobs.push(j);
+  });
+  return [...m.values()].sort((a,b)=>b.jobs.length-a.jobs.length);
+}
+
+function popupHTML(s){
+  const roles=s.jobs.sort((a,b)=>a.age-b.age).map(j=>
+    `<li>${j.title}<span>${j.lvl} · ${j.type} · $${j.min}k-$${j.max}k · ${j.age}d ago</span></li>`).join('');
+  return `<div class="pop"><h5>${s.co}</h5><div class="ps">${s.city}, ${s.st} · `+
+    (s.lca?`${s.lca} H-1B filings`:'no filing record')+`</div><ul>${roles}</ul></div>`;
+}
+
+function drawMap(){
+  cluster.clearLayers();
+  if(heat){map.removeLayer(heat);heat=null;}
+
+  if(mode==='heat'){
+    heat=L.heatLayer(sites.flatMap(s=>s.jobs.map(()=>[s.lat,s.lng,1])),
+      {radius:26,blur:20,maxZoom:9,gradient:{0.25:'#C3D6FC',0.5:'#3B6FF5',0.75:'#0FA26B',1:'#B4700A'}}).addTo(map);
+    return;
+  }
+  if(!map.hasLayer(cluster)) map.addLayer(cluster);
+  sites.forEach((s,i)=>{
+    const n=s.jobs.length, d=n>1?34:28;
+    const m=L.marker([s.lat,s.lng],{
+      n, icon:L.divIcon({className:'pin'+(s.lca?'':' no'),html:`<b>${n}</b>`,
+        iconSize:[d,d],iconAnchor:[d/2,d/2]})
+    });
+    m.bindTooltip(`${s.co} · ${n} role${n>1?'s':''}`,{className:'tt',direction:'top',offset:[0,-14]});
+    m.bindPopup(popupHTML(s),{maxWidth:280});
+    m.on('click',()=>selectSite(i,false));
+    s._m=m; cluster.addLayer(m);
+  });
+}
+
+function fit(){
+  if(mode==='heat'||!sites.length) return;
+  const b=L.latLngBounds(sites.map(s=>[s.lat,s.lng]));
+  map.fitBounds(b,{padding:[55,55],maxZoom:10,animate:true});
+}
+
+function selectSite(i,fly){
+  sel=i;
+  document.querySelectorAll('.card').forEach(c=>c.classList.toggle('on',+c.dataset.s===i));
+  const card=document.querySelector(`.card[data-s="${i}"]`);
+  if(card) card.scrollIntoView({block:'nearest',behavior:'smooth'});
+  const s=sites[i];
+  if(fly&&s&&s._m){
+    map.flyTo([s.lat,s.lng],Math.max(map.getZoom(),9),{duration:.55});
+    setTimeout(()=>cluster.zoomToShowLayer(s._m,()=>s._m.openPopup()),580);
+  }
+}
+
+function render(){
+  const rows=JOBS.filter(matches);
+  sites=groupSites(rows);
+  $('count').textContent=`${rows.length} open · ${new Set(rows.map(r=>r.co)).size} employers · ${sites.length} sites`;
+  drawMap();
+
+  const cards=[];
+  sites.forEach((s,si)=>s.jobs.sort((a,b)=>a.age-b.age).forEach(j=>cards.push({j,si})));
+  cards.sort((a,b)=>a.j.age-b.j.age);
+
+  $('list').innerHTML = cards.length ? cards.map(({j,si})=>`
+    <div class="card" data-s="${si}">
+      <h3>${j.url?`<a href="${j.url}" target="_blank" rel="noopener">${j.title}</a>`:j.title}</h3><div class="co">${j.co}</div>
+      <div class="meta">${j.city}, ${j.st} ${j.zip} · via ${j.src}</div>
+      <div class="pills">
+        <span class="pill">${j.lvl}</span><span class="pill">${j.type}</span>
+        ${j.min&&j.max?`<span class="pill pay">$${j.min}k-$${j.max}k</span>`:'<span class="pill">pay not posted</span>'}
+        <span class="pill ${j.lca?'spon':'nospon'}">${j.lca?j.lca+' H-1B':'no record'}</span>
+        <span class="pill ${j.age<=7?'fresh':''}">${j.age}d ago</span>
+        ${j.deg==='phd'?'<span class="pill nospon">PhD</span>':''}
+      </div>${bars(j.lca)}
+    </div>`).join('')
+    : `<div class="empty">No roles match. Try widening the pay floor, the date window, or clearing the state.</div>`;
+
+  document.querySelectorAll('.card').forEach(c=>c.onclick=()=>selectSite(+c.dataset.s,true));
+  fit();
+}
+function bars(n){const c=conf(n);return `<div class="meter">${[0,1,2,3].map(i=>`<i class="${i<c?'f':''}"></i>`).join('')}</div>`;}
+
+['f-state','f-city','f-title','f-level','f-type','f-pay','f-spon','f-age','f-phd'].forEach(id=>
+  $(id).addEventListener('input',()=>{ if(id==='f-state') cityOptions($('f-state').value); render(); }));
+
+$('reset').onclick=()=>{
+  ['f-state','f-city','f-title','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
+  $('f-spon').checked=false; $('f-age').value='30'; $('f-phd').checked=true;
+  cityOptions(''); render();
+};
+$('v-pins').onclick=()=>{mode='pins';$('v-pins').classList.add('on');$('v-heat').classList.remove('on');drawMap();};
+$('v-heat').onclick=()=>{mode='heat';$('v-heat').classList.add('on');$('v-pins').classList.remove('on');
+  if(map.hasLayer(cluster))map.removeLayer(cluster);drawMap();};
+$('v-fit').onclick=fit;
+
+function renderWatch(){
+  const st=$('w-state').value,why=$('w-why').value;
+  const rows=WATCH.filter(w=>(!st||w.st===st)&&(!why||w.tag===why)).sort((a,b)=>a.quiet-b.quiet);
+  $('watch-list').innerHTML=
+    `<div class="whdr"><span>Employer</span><span>Location</span><span>Why now</span><span>H-1B record</span><span>Quiet for</span></div>`+
+    (rows.length?rows.map(w=>`<div class="wrow">
+      <div><div class="wname">${w.co}</div><div class="wsub">${TAGS[w.tag]}</div></div>
+      <div class="wsub">${w.city}, ${w.st}</div>
+      <div class="wwhy">${w.why}</div>
+      <div><div class="wheat">${[0,1,2,3].map(i=>`<i class="${i<conf(w.lca)?'f':''}"></i>`).join('')}</div>
+        <div class="wsub" style="text-align:right">${w.lca} filings</div></div>
+      <div class="wcad">${w.quiet}d<br><span style="opacity:.6">${w.cad}</span></div>
+    </div>`).join('')
+    :`<div class="empty">No watchlist employers match.</div>`);
+}
+Object.entries(TAGS).forEach(([k,v])=>$('w-why').insertAdjacentHTML('beforeend',`<option value="${k}">${v}</option>`));
+$('w-state').oninput=renderWatch; $('w-why').oninput=renderWatch;
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  const jobs=t.dataset.view==='jobs';
+  $('view-jobs').hidden=!jobs; $('view-watch').hidden=jobs;
+  if(jobs) setTimeout(()=>{map.invalidateSize();fit();},30); else renderWatch();
+});
+
+async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r.ok?await r.json():null; }catch(e){ return null; } }
+
+(async function boot(){
+  const [j,w] = await Promise.all([grab('jobs.json'), grab('watchlist.json')]);
+  let live=false;
+  if(Array.isArray(j)&&j.length){ JOBS.length=0; JOBS.push(...j); live=true; }
+  if(Array.isArray(w)&&w.length){ WATCH.length=0; WATCH.push(...w); }
+  $('src-note').innerHTML = live
+    ? 'Live data, refreshed daily from public job boards and US Department of Labor filings.'
+    : 'Showing bundled sample data. Run <code>ingest.py</code> to generate <code>jobs.json</code> and this switches to live automatically.';
+  rebuildOptions(); cityOptions(''); render(); renderWatch();
+})();
+</script>
+
+  <p class="kicker">Built from public ATS job boards and US Department of Labor visa filing records.
+  Sponsorship signal reflects past H-1B filings and is not a guarantee that an employer will sponsor today.
+  <a href="https://github.com/YOURNAME/nextgig">Source on GitHub</a></p>
+</div>
+</body>
+</html>
