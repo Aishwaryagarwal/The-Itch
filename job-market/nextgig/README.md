@@ -112,4 +112,13 @@ postings that disclose them, which is a minority in most states.
 
 ## License
 
-MIT
+Copyright © 2026 Aishwarya Agarwal. All rights reserved.
+
+Licensed under the **GNU Affero General Public License v3.0** (see the
+[`LICENSE`](../../LICENSE) file at the repository root). In short: you are
+welcome to read, learn from, and build on this code, but any distributed or
+network-hosted derivative must remain open source under the same license and
+must keep the original attribution. It may not be taken closed-source or
+re-hosted as a proprietary service.
+
+For commercial or proprietary licensing outside those terms, contact the author.
