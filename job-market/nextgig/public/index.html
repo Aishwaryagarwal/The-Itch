@@ -99,6 +99,44 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
 .card h3{font-family:'Space Grotesk',sans-serif;font-size:13.5px;margin:0 0 3px;font-weight:500;
   line-height:1.3;color:var(--ink)}
 .co{font-size:12.5px;color:var(--signal);font-weight:600}
+.co .dom{color:var(--muted);font-weight:500;font-size:11px;background:var(--paper);
+  border:1px solid var(--line);border-radius:20px;padding:1px 8px;margin-left:4px;white-space:nowrap}
+
+/* events + coming-soon tabs */
+.events{flex:1;overflow-y:auto;padding:18px 20px;min-height:0;background:var(--paper)}
+.ev-chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.ev-chip{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;
+  border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:20px;padding:5px 11px;cursor:pointer}
+.ev-chip.on{background:var(--signal);border-color:var(--signal);color:#fff}
+.erow2{display:grid;grid-template-columns:120px 1fr auto;gap:16px;align-items:start;
+  padding:14px;border:1px solid var(--line);border-radius:10px;margin-bottom:9px;background:var(--card);box-shadow:var(--shadow)}
+.erow2:hover{border-color:var(--signal)}
+.ev-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);font-weight:600;line-height:1.5}
+.ev-date .soon{display:inline-block;margin-top:4px;font-size:9px;color:var(--sponsor);font-weight:600}
+.ev-name{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:500;color:var(--ink)}
+.ev-name a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.ev-name a:hover{border-color:var(--signal);color:var(--signal)}
+.ev-why{font-size:12px;line-height:1.5;color:var(--text);margin-top:5px;max-width:640px}
+.ev-tip{font-size:11px;color:var(--muted);margin-top:5px;font-style:italic}
+.ev-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.ev-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;
+  border-radius:5px;padding:2px 7px;border:1px solid var(--line);color:var(--muted)}
+.ev-tag.net{background:rgba(59,111,245,.1);border-color:rgba(59,111,245,.3);color:var(--signal)}
+.ev-tag.learn{background:rgba(15,162,107,.1);border-color:rgba(15,162,107,.3);color:var(--sponsor)}
+.ev-tag.free{background:rgba(15,162,107,.12);border-color:rgba(15,162,107,.35);color:var(--sponsor)}
+.ev-tag.paid{background:var(--paper)}
+.ev-meta{text-align:right;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);white-space:nowrap;line-height:1.7}
+.soon-wrap{flex:1;overflow-y:auto;min-height:0;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:30px}
+.soon-card{max-width:560px;text-align:center}
+.soon-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sponsor);border:1px solid var(--sponsor);border-radius:20px;padding:4px 12px;margin-bottom:16px}
+.soon-card h2{font-family:'Space Grotesk',sans-serif;font-size:22px;color:var(--ink);margin:0 0 10px}
+.soon-card p{font-size:13.5px;line-height:1.7;color:var(--text);margin:0 auto 18px;max-width:460px}
+.soon-card svg{max-width:280px;height:auto;margin:6px auto 20px;display:block}
+.soon-link{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+  color:#fff;background:var(--signal);border-radius:8px;padding:10px 18px;text-decoration:none}
+.soon-link:hover{opacity:.9}
+@media(max-width:760px){.erow2{grid-template-columns:1fr}.ev-meta{text-align:left}}
 .meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px}
 .pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .pill{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:3px 7px;border-radius:20px;
@@ -201,10 +239,13 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
     <button class="tab on" data-view="jobs">Open roles</button>
     <button class="tab" data-view="watch">Worth watching</button>
     <button class="tab" data-view="emerging">Emerging titles</button>
+    <button class="tab" data-view="events">Events</button>
+    <button class="tab" data-view="soon">Coming soon</button>
   </div>
 
   <div class="body" id="view-jobs">
     <div class="filters">
+      <label>Domain</label><select id="f-domain"><option value="">All domains</option></select>
       <label>State</label><select id="f-state"><option value="">All states</option></select>
       <label>City</label><select id="f-city"><option value="">All cities</option></select>
       <label>Title contains</label><input type="text" id="f-title" placeholder="e.g. analytics, platform">
@@ -263,6 +304,37 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
       </div>
     </div>
     <div id="emerging-list"></div>
+  </div>
+
+  <div class="events" id="view-events" hidden>
+    <div class="watch-head">
+      <p>Conferences and events worth your time for data / AI / analytics roles —
+      curated, not exhaustive. Each is flagged for whether it leans toward
+      <b>networking</b> with sponsoring employers or <b>learning</b> the stack,
+      and whether it is free or paid. Upcoming first.</p>
+      <div class="ev-chips" id="ev-chips">
+        <button class="ev-chip on" data-f="all">All</button>
+        <button class="ev-chip" data-f="network">Networking</button>
+        <button class="ev-chip" data-f="learn">Learning</button>
+        <button class="ev-chip" data-f="free">Free / low-cost</button>
+        <button class="ev-chip" data-f="virtual">Virtual</button>
+      </div>
+    </div>
+    <div id="events-list"></div>
+  </div>
+
+  <div class="soon-wrap" id="view-soon" hidden>
+    <div class="soon-card">
+      <span class="soon-badge">Coming soon</span>
+      <h2>Skills radar</h2>
+      <p>A living map of where my data &amp; AI engineering skills stand — technical
+      and professional — updated as I grow. The full interactive version is a
+      separate project in the works.</p>
+      <div id="soon-radar"></div>
+      <a class="soon-link" id="soon-link"
+         href="https://github.com/Aishwaryagarwal/The-Itch/tree/main/growth/skills-radar"
+         target="_blank" rel="noopener">Peek at the project →</a>
+    </div>
   </div>
 
   <div class="note"><span id="src-note">Loading</span></div>
@@ -347,10 +419,12 @@ const EMERGING=[];
 const fill=(el,v)=>v.forEach(x=>el.insertAdjacentHTML('beforeend',`<option>${x}</option>`));
 
 function rebuildOptions(){
+  $('f-domain').innerHTML='<option value="">All domains</option>';
   $('f-state').innerHTML='<option value="">All states</option>';
   $('f-level').innerHTML='<option value="">Any level</option>';
   $('f-type').innerHTML='<option value="">Any setup</option>';
   $('w-state').innerHTML='<option value="">All states</option>';
+  fill($('f-domain'),[...new Set(JOBS.map(j=>j.domain))].filter(Boolean).sort());
   fill($('f-state'),[...new Set(JOBS.map(j=>j.st))].filter(Boolean).sort());
   fill($('f-level'),["Mid","Senior","Staff","Lead","Manager","Director"]);
   fill($('f-type'),[...new Set(JOBS.map(j=>j.type))].filter(Boolean).sort());
@@ -381,8 +455,10 @@ function cityOptions(st){
 }
 
 function matches(j){
+  const dom=$('f-domain').value;
   const st=$('f-state').value,city=$('f-city').value,t=$('f-title').value.trim().toLowerCase();
   const lv=$('f-level').value,ty=$('f-type').value,pay=parseFloat($('f-pay').value);
+  if(dom&&j.domain!==dom) return false;
   if(st&&j.st!==st) return false;
   if(city&&j.city!==city) return false;
   if(t&&!(j.title+' '+j.co).toLowerCase().includes(t)) return false;
@@ -467,7 +543,8 @@ function render(){
 
   $('list').innerHTML = cards.length ? cards.map(({j,si})=>`
     <div class="card" data-s="${si}">
-      <h3>${j.url?`<a href="${j.url}" target="_blank" rel="noopener">${j.title}</a>`:j.title}</h3><div class="co">${j.co}</div>
+      <h3>${j.url?`<a href="${j.url}" target="_blank" rel="noopener">${j.title}</a>`:j.title}</h3>
+      <div class="co">${j.co}${j.domain&&j.domain!=='Other'?` <span class="dom">${j.domain}</span>`:''}</div>
       <div class="meta">${j.city?j.city+", ":""}${j.st}${j.zip?" "+j.zip:""} · via ${j.src}</div>
       <div class="pills">
         <span class="pill">${j.lvl}</span><span class="pill">${j.type}</span>
@@ -484,11 +561,11 @@ function render(){
 }
 function bars(n){const c=conf(n);return `<div class="meter">${[0,1,2,3].map(i=>`<i class="${i<c?'f':''}"></i>`).join('')}</div>`;}
 
-['f-state','f-city','f-title','f-level','f-type','f-pay','f-spon','f-age','f-phd'].forEach(id=>
+['f-domain','f-state','f-city','f-title','f-level','f-type','f-pay','f-spon','f-age','f-phd'].forEach(id=>
   $(id).addEventListener('input',()=>{ if(id==='f-state') cityOptions($('f-state').value); render(); }));
 
 $('reset').onclick=()=>{
-  ['f-state','f-city','f-title','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
+  ['f-domain','f-state','f-city','f-title','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
   $('f-spon').checked=false; $('f-age').value='30'; $('f-phd').checked=true;
   cityOptions(''); render();
 };
@@ -529,24 +606,80 @@ function renderEmerging(){
 }
 $('e-find').oninput=renderEmerging;
 
-const PANELS={jobs:'view-jobs',watch:'view-watch',emerging:'view-emerging'};
+// ---- Events ----
+const EVENTS=[];
+let evFilter='all';
+function evPass(e){
+  if(evFilter==='network') return e.type==='network'||e.type==='both';
+  if(evFilter==='learn')   return e.type==='learn'||e.type==='both';
+  if(evFilter==='free')    return e.cost==='Free'||e.cost==='Low-cost';
+  if(evFilter==='virtual') return e.format==='Virtual'||e.format==='Hybrid';
+  return true;
+}
+function renderEvents(){
+  const now=Date.now();
+  const rows=EVENTS.filter(evPass).slice().sort((a,b)=>
+    (a.date&&b.date) ? new Date(a.date)-new Date(b.date) : a.date?-1:b.date?1:0);
+  $('events-list').innerHTML = rows.length ? rows.map(e=>{
+    const soon = e.date && (new Date(e.date)-now)>0 && (new Date(e.date)-now)<60*864e5;
+    const tags=[];
+    if(e.type==='network'||e.type==='both') tags.push('<span class="ev-tag net">Networking</span>');
+    if(e.type==='learn'||e.type==='both')   tags.push('<span class="ev-tag learn">Learning</span>');
+    tags.push(e.cost==='Paid'?'<span class="ev-tag paid">Paid</span>':'<span class="ev-tag free">Free / low-cost</span>');
+    if(e.format==='Virtual'||e.format==='Hybrid') tags.push('<span class="ev-tag">Virtual</span>');
+    return `<div class="erow2">
+      <div class="ev-date">${e.date_label}${soon?'<br><span class="soon">◆ soon</span>':''}</div>
+      <div>
+        <div class="ev-name"><a href="${e.url}" target="_blank" rel="noopener">${e.name}</a></div>
+        <div class="ev-why">${e.why}</div>
+        ${e.tip?`<div class="ev-tip">Tip — ${e.tip}</div>`:''}
+        <div class="ev-tags">${tags.join('')}</div>
+      </div>
+      <div class="ev-meta">${e.city}<br>${e.cost_label}</div>
+    </div>`;
+  }).join('') : `<div class="empty">No events match this filter.</div>`;
+}
+document.querySelectorAll('#ev-chips .ev-chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('#ev-chips .ev-chip').forEach(x=>x.classList.toggle('on',x===c));
+  evFilter=c.dataset.f; renderEvents();
+});
+
+// ---- Coming soon: skills radar teaser (baseline; the real one is its own project) ----
+function renderRadarPreview(){
+  const vals=[4,4,3.5,3.5,3,3.5,3,3,4,3,4,3.5];   // 0-5 baseline
+  const N=vals.length, cx=140, cy=125, R=100, max=5;
+  const at=(v,i)=>{const a=-Math.PI/2+i*2*Math.PI/N,r=R*v/max;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+  const poly=a=>a.map((v,i)=>at(v,i).map(n=>n.toFixed(1)).join(',')).join(' ');
+  let g='';
+  [0.25,0.5,0.75,1].forEach(f=>g+=`<polygon points="${poly(vals.map(()=>max*f))}" fill="none" stroke="var(--line)" stroke-width="1"/>`);
+  for(let i=0;i<N;i++){const a=-Math.PI/2+i*2*Math.PI/N;
+    g+=`<line x1="${cx}" y1="${cy}" x2="${(cx+R*Math.cos(a)).toFixed(1)}" y2="${(cy+R*Math.sin(a)).toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`;}
+  g+=`<polygon points="${poly(vals)}" fill="rgba(59,111,245,.22)" stroke="var(--signal)" stroke-width="2"/>`;
+  vals.forEach((v,i)=>{const p=at(v,i);g+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="var(--signal)"/>`;});
+  $('soon-radar').innerHTML=`<svg viewBox="0 0 280 250" role="img" aria-label="Skills radar preview">${g}</svg>`;
+}
+
+const PANELS={jobs:'view-jobs',watch:'view-watch',emerging:'view-emerging',events:'view-events',soon:'view-soon'};
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
   const v=t.dataset.view;
   Object.entries(PANELS).forEach(([k,id])=>$(id).hidden=(k!==v));
   if(v==='jobs') setTimeout(()=>{map.invalidateSize();fit();},30);
   else if(v==='watch') renderWatch();
-  else renderEmerging();
+  else if(v==='emerging') renderEmerging();
+  else if(v==='events') renderEvents();
+  else if(v==='soon') renderRadarPreview();
 });
 
 async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r.ok?await r.json():null; }catch(e){ return null; } }
 
 (async function boot(){
-  const [j,w,meta,e] = await Promise.all([grab('jobs.json'), grab('watchlist.json'), grab('meta.json'), grab('emerging.json')]);
+  const [j,w,meta,e,ev] = await Promise.all([grab('jobs.json'), grab('watchlist.json'), grab('meta.json'), grab('emerging.json'), grab('events.json')]);
   let live=false;
   if(Array.isArray(j)&&j.length){ JOBS.length=0; JOBS.push(...j); live=true; }
   if(Array.isArray(w)&&w.length){ WATCH.length=0; WATCH.push(...w); }
   if(Array.isArray(e)&&e.length){ EMERGING.length=0; EMERGING.push(...e); }
+  if(Array.isArray(ev)&&ev.length){ EVENTS.length=0; EVENTS.push(...ev); }
   if(live){
     let when='';
     if(meta&&meta.updated){
@@ -565,7 +698,7 @@ async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r
   } else {
     $('src-note').innerHTML = '<b class="dot stale"></b>Showing bundled sample data. Run <code>scripts/ingest.py</code> to generate <code>jobs.json</code>, this switches to live on its own.';
   }
-  rebuildOptions(); cityOptions(''); render(); renderWatch(); renderEmerging();
+  rebuildOptions(); cityOptions(''); render(); renderWatch(); renderEmerging(); renderEvents(); renderRadarPreview();
 })();
 </script>
 

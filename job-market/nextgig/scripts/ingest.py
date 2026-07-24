@@ -37,6 +37,26 @@ TARGETS = [
     ("lever", "spotify"),         ("ashby", "ramp"),
 ]
 
+# Specific industry domain per employer — "Retail", not "Other". Anything not
+# listed falls back to "Other"; add new employers here as TARGETS grows so the
+# domain filter stays precise rather than vague.
+DOMAINS = {
+    "databricks":     "Data & AI Infrastructure",
+    "snowflake":      "Data & AI Infrastructure",
+    "sigmacomputing": "Analytics & BI",
+    "palantir":       "Data · Government & Defense",
+    "stripe":         "Fintech · Payments",
+    "chime":          "Fintech · Banking",
+    "ramp":           "Fintech · Spend Management",
+    "datadog":        "DevTools · Observability",
+    "cloudflare":     "Infrastructure · Security",
+    "wayfair":        "Retail · E-commerce",
+    "klaviyo":        "MarTech",
+    "duolingo":       "EdTech",
+    "zillow":         "Real Estate · PropTech",
+    "spotify":        "Media · Audio Streaming",
+}
+
 # ============================================================ TAXONOMY
 # Broad: a title qualifies if it has a DOMAIN word AND a ROLE word, or hits
 # STANDALONE. New titles get caught by composition, not by enumeration.
@@ -478,6 +498,7 @@ def main():
 
             rows.append({
                 "co": slug.replace("-", " ").title(), "title": p["title"],
+                "domain": DOMAINS.get(slug, "Other"),
                 "city": g["city"], "st": g["st"], "zip": g["zip"],
                 "lat": g["lat"], "lng": g["lng"],
                 "lvl": level_of(p["title"]),

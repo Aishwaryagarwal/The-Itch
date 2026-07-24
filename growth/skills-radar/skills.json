@@ -1,0 +1,20 @@
+{
+ "owner": "Aishwarya Agarwal",
+ "scale": 5,
+ "updated": "2026-07-24",
+ "note": "Self-assessed, 0-5. Edit these scores as you grow (or use Edit mode on the page and copy the result back here).",
+ "axes": [
+  {"name": "SQL",                      "group": "Technical",    "score": 4},
+  {"name": "Python",                   "group": "Technical",    "score": 4},
+  {"name": "Pipelines & ETL",          "group": "Technical",    "score": 3.5},
+  {"name": "Cloud & Warehouse",        "group": "Technical",    "score": 3.5},
+  {"name": "ML & AI",                  "group": "Technical",    "score": 3},
+  {"name": "Data Modeling",            "group": "Technical",    "score": 3.5},
+  {"name": "BI & Visualization",       "group": "Technical",    "score": 3},
+  {"name": "Orchestration",            "group": "Technical",    "score": 3},
+  {"name": "Communication",            "group": "Professional", "score": 4},
+  {"name": "Leadership",               "group": "Professional", "score": 3},
+  {"name": "Initiative",               "group": "Professional", "score": 4},
+  {"name": "Breaking Down Complexity", "group": "Professional", "score": 3.5}
+ ]
+}

@@ -1,0 +1,93 @@
+[
+ {
+  "name": "dbt Summit 2026 (formerly Coalesce)",
+  "date": "2026-09-15",
+  "date_label": "Sep 15–18, 2026",
+  "city": "Las Vegas, NV",
+  "format": "In-person",
+  "cost": "Paid",
+  "cost_label": "~$1,695",
+  "type": "both",
+  "why": "The flagship modern-data-stack event, now leaning into the analytics + AI convergence. This is where analytics engineers and the tooling crowd gather — strong for both learning and meeting practitioners at data-forward employers.",
+  "tip": "Discounts for students, nonprofits, government, and groups of 3+.",
+  "url": "https://www.getdbt.com/dbt-summit"
+ },
+ {
+  "name": "ODSC AI West 2026",
+  "date": "2026-10-27",
+  "date_label": "Oct 27–29, 2026",
+  "city": "Burlingame, CA (SF Bay)",
+  "format": "In-person",
+  "cost": "Paid",
+  "cost_label": "paid; free virtual expo pass",
+  "type": "learn",
+  "why": "Hands-on ML / AI / data-science training in the Bay Area. Best pick for leveling up the technical stack, and the location means plenty of Bay Area data employers in the room.",
+  "tip": "A free virtual expo/keynote pass is usually offered if the paid ticket is out of budget.",
+  "url": "https://odsc.ai/west/"
+ },
+ {
+  "name": "PyData Global 2026",
+  "date": "2026-12-08",
+  "date_label": "Dec 8–10, 2026",
+  "city": "Virtual",
+  "format": "Virtual",
+  "cost": "Low-cost",
+  "cost_label": "low-cost / pay-what-you-can",
+  "type": "learn",
+  "why": "The cheapest, most accessible way to stay current on the Python data and ML ecosystem — all online. Talks are practitioner-led and directly relevant to data / analytics engineering.",
+  "tip": "Local PyData meetups run free year-round in most cities — great low-pressure networking.",
+  "url": "https://pydata.org/global2026"
+ },
+ {
+  "name": "Women in Data Science (WiDS)",
+  "date": null,
+  "date_label": "Annual · next ~Feb–Mar 2027",
+  "city": "Stanford + global chapters + virtual",
+  "format": "Hybrid",
+  "cost": "Free",
+  "cost_label": "free / low-cost",
+  "type": "network",
+  "why": "Free, welcoming, and everywhere — the main event plus hundreds of local chapters worldwide. Excellent for meeting people in data and finding mentors and role models early in a search.",
+  "tip": "Find your nearest regional chapter; many run their own free one-day events.",
+  "url": "https://www.widsworldwide.org/"
+ },
+ {
+  "name": "Gartner Data & Analytics Summit (US)",
+  "date": null,
+  "date_label": "Annual · next ~Mar 2027, Orlando",
+  "city": "Orlando, FL",
+  "format": "In-person",
+  "cost": "Paid",
+  "cost_label": "premium (enterprise-priced)",
+  "type": "network",
+  "why": "Where enterprise data leaders and hiring managers gather. Pricey, so worth it mainly if you are targeting larger organizations and want senior-level face time — watch for an employer or scholarship pass.",
+  "tip": "Ask if a current or target employer has passes; individuals rarely pay full price.",
+  "url": "https://www.gartner.com/en/conferences/na/data-analytics-us"
+ },
+ {
+  "name": "Snowflake Summit 2027",
+  "date": "2027-06-07",
+  "date_label": "Jun 7–10, 2027",
+  "city": "San Francisco, CA (Moscone)",
+  "format": "In-person",
+  "cost": "Paid",
+  "cost_label": "paid; watch early-bird",
+  "type": "both",
+  "why": "One of the largest data + AI gatherings; many sponsoring employers recruit on the floor. Far out, but worth planning for — the networking-to-cost ratio is high if you land an early-bird or scholarship rate.",
+  "tip": "Early-bird pricing and scholarship / diversity passes open months ahead — set a reminder.",
+  "url": "https://www.snowflake.com/summit/"
+ },
+ {
+  "name": "Databricks Data + AI Summit",
+  "date": null,
+  "date_label": "Annual · next ~Jun 2027, San Francisco",
+  "city": "San Francisco, CA (Moscone)",
+  "format": "In-person",
+  "cost": "Paid",
+  "cost_label": "paid; watch early-bird",
+  "type": "both",
+  "why": "Among the biggest data + AI events, with a huge employer presence — a peer to Snowflake Summit. The 2026 edition has passed; the next runs in June. Strong for both the stack and hiring conversations.",
+  "tip": "Free virtual keynote streaming is usually available if you cannot attend in person.",
+  "url": "https://www.databricks.com/dataaisummit"
+ }
+]

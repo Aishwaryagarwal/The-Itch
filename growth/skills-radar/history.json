@@ -1,0 +1,20 @@
+[
+ {
+  "date": "2026-07-24",
+  "label": "Baseline",
+  "scores": {
+   "SQL": 4,
+   "Python": 4,
+   "Pipelines & ETL": 3.5,
+   "Cloud & Warehouse": 3.5,
+   "ML & AI": 3,
+   "Data Modeling": 3.5,
+   "BI & Visualization": 3,
+   "Orchestration": 3,
+   "Communication": 4,
+   "Leadership": 3,
+   "Initiative": 4,
+   "Breaking Down Complexity": 3.5
+  }
+ }
+]

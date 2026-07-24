@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Skills Radar — Aishwarya Agarwal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><circle cx=%2216%22 cy=%2216%22 r=%2213%22 fill=%22none%22 stroke=%22%233B6FF5%22 stroke-width=%222%22/><polygon points=%2216,5 25,13 21,25 11,25 7,13%22 fill=%22%233B6FF5%22 opacity=%22.35%22/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --signal:#3B6FF5; --sponsor:#0FA26B; --ghost:#8A97AD;
+  --paper:#F4F6FB; --card:#fff; --ink:#0F1B2D; --text:#33415A; --muted:#6B7B95;
+  --line:#E1E7F0; --shadow:0 1px 3px rgba(15,27,45,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0C1420; --card:#131E2E; --ink:#EAF0FA; --text:#B9C6DA; --muted:#7E8DA6;
+    --line:#243349; --ghost:#5C6B85; --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1420; --card:#131E2E; --ink:#EAF0FA; --text:#B9C6DA; --muted:#7E8DA6;
+  --line:#243349; --ghost:#5C6B85; --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+:root[data-theme="light"]{
+  --paper:#F4F6FB; --card:#fff; --ink:#0F1B2D; --text:#33415A; --muted:#6B7B95;
+  --line:#E1E7F0; --ghost:#8A97AD; --shadow:0 1px 3px rgba(15,27,45,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 20px 40px}
+header{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:26px;color:var(--ink);margin:0;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px;margin:4px 0 0;max-width:520px;line-height:1.6}
+.tools{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+button.tool{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.03em;
+  border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:8px;padding:8px 13px;cursor:pointer}
+button.tool:hover{border-color:var(--signal);color:var(--signal)}
+button.tool.on{background:var(--signal);border-color:var(--signal);color:#fff}
+.stamp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin:2px 0 20px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:start}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px}
+.radar-wrap{position:relative}
+svg.radar{width:100%;height:auto;display:block;overflow:visible}
+.axis-label{font-family:'Inter',sans-serif;font-size:11px;fill:var(--muted);font-weight:500}
+.ring{fill:none;stroke:var(--line);stroke-width:1}
+.spoke{stroke:var(--line);stroke-width:1}
+.poly-base{fill:none;stroke:var(--ghost);stroke-width:1.6;stroke-dasharray:5 4}
+.poly-cur{fill:rgba(59,111,245,.16);stroke:var(--signal);stroke-width:2;stroke-linejoin:round}
+.vtx{fill:var(--signal);stroke:var(--card);stroke-width:1.5;cursor:pointer}
+.vtx:hover{r:7}
+.legend{display:flex;gap:18px;margin:14px 2px 0;font-size:12px;color:var(--text)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:16px;height:0;border-top-width:3px;border-top-style:solid;display:inline-block}
+.sw.cur{border-top-color:var(--signal)}
+.sw.base{border-top-color:var(--ghost);border-top-style:dashed}
+h2{font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--ink);margin:0 0 12px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em}
+.big{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.big b{font-family:'Space Grotesk',sans-serif;font-size:34px;color:var(--ink);font-weight:700}
+.big .of{color:var(--muted);font-size:14px}
+.delta{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
+.up{color:var(--sponsor)} .down{color:#C0563B} .flat{color:var(--muted)}
+.hint{color:var(--muted);font-size:11.5px;margin:6px 0 0;line-height:1.55}
+.axrow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;
+  padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+.axrow:first-of-type{border-top:none}
+.axname{color:var(--ink)}
+.axgroup{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-left:8px}
+.axval{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink);font-weight:600;min-width:34px;text-align:right}
+.axdelta{font-family:'JetBrains Mono',monospace;font-size:11px;min-width:40px;text-align:right}
+/* edit */
+#edit{margin-top:22px;display:none}
+#edit.show{display:block}
+.slrow{display:grid;grid-template-columns:180px 1fr 40px;gap:12px;align-items:center;padding:6px 0}
+.slrow label{font-size:12.5px;color:var(--text)}
+.slrow input[type=range]{width:100%;accent-color:var(--signal)}
+.slrow .v{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink);text-align:right;font-weight:600}
+.editbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.editbtns button{font-family:'JetBrains Mono',monospace;font-size:11px;border-radius:8px;padding:9px 14px;cursor:pointer;border:1px solid var(--line)}
+.editbtns .primary{background:var(--signal);color:#fff;border-color:var(--signal)}
+.editbtns .ghost{background:var(--card);color:var(--text)}
+.copied{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sponsor);align-self:center}
+/* table */
+#tableview{margin-top:22px;display:none;overflow-x:auto}
+#tableview.show{display:block}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.num{font-family:'JetBrains Mono',monospace;text-align:right;color:var(--ink)}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--paper);font-size:11px;
+  font-family:'JetBrains Mono',monospace;padding:6px 9px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:9;white-space:nowrap}
+footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;line-height:1.6}
+footer a{color:var(--signal);text-decoration:none}
+@media(max-width:820px){.grid{grid-template-columns:1fr}.slrow{grid-template-columns:130px 1fr 36px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Skills Radar</h1>
+      <p class="sub">Where my data &amp; AI engineering skills stand — technical and
+      professional — self-assessed on a 0–5 scale. The dashed outline is my baseline;
+      the filled shape is where I am now. It grows as I do.</p>
+    </div>
+    <div class="tools">
+      <button class="tool" id="btn-edit">Edit scores</button>
+      <button class="tool" id="btn-table">Table view</button>
+      <button class="tool" id="btn-theme" title="Toggle light/dark">◐ Theme</button>
+    </div>
+  </header>
+  <div class="stamp" id="stamp"></div>
+
+  <div class="grid">
+    <div class="panel radar-wrap">
+      <svg class="radar" id="radar" viewBox="0 0 600 600" role="img" aria-labelledby="radar-title"></svg>
+      <title id="radar-title">Radar chart of skill levels</title>
+      <div class="legend">
+        <span><i class="sw cur"></i>Now</span>
+        <span><i class="sw base"></i>Baseline <em id="base-date" style="font-style:normal;color:var(--muted)"></em></span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Progress since baseline</h2>
+      <div class="big">
+        <b id="avg-now">–</b><span class="of">/ 5 avg now</span>
+        <span class="delta" id="avg-delta"></span>
+      </div>
+      <p class="hint" id="progress-hint"></p>
+      <div id="axlist" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="edit">
+    <h2>Edit scores</h2>
+    <p class="hint">Drag to update. The radar moves live. When you are happy, copy the
+    files back into the repo — that is how your progress gets recorded over time.</p>
+    <div id="sliders" style="margin-top:12px"></div>
+    <div class="editbtns">
+      <button class="primary" id="copy-skills">Copy skills.json</button>
+      <button class="ghost" id="copy-snapshot">Copy history.json (adds today's snapshot)</button>
+      <button class="ghost" id="reset-edit">Reset to saved</button>
+      <span class="copied" id="copied"></span>
+    </div>
+  </div>
+
+  <div class="panel" id="tableview">
+    <h2>All skills</h2>
+    <table>
+      <thead><tr><th>Skill</th><th>Group</th><th style="text-align:right">Baseline</th><th style="text-align:right">Now</th><th style="text-align:right">Δ</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>
+    A <a href="https://github.com/Aishwaryagarwal/The-Itch/tree/main/growth/skills-radar">The Itch</a>
+    project · companion to <a href="https://mynextgig.netlify.app/">NextGig</a>.<br>
+    © 2026 Aishwarya Agarwal · Licensed under AGPL-3.0.
+  </footer>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let AX=[], BASE={}, HIST=[], SCALE=5, cur={}, saved={};
+
+async function load(){
+  const s=await fetch('skills.json',{cache:'no-store'}).then(r=>r.json());
+  const h=await fetch('history.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>[]);
+  SCALE=s.scale||5; AX=s.axes; HIST=Array.isArray(h)?h:[];
+  AX.forEach(a=>{cur[a.name]=a.score;});
+  saved=JSON.parse(JSON.stringify(cur));
+  BASE = HIST.length ? HIST[0].scores : JSON.parse(JSON.stringify(cur));
+  $('stamp').textContent = `Last updated ${s.updated} · ${AX.length} skills · scale 0–${SCALE}`;
+  $('base-date').textContent = HIST.length ? `(${HIST[0].date})` : '';
+  buildSliders(); render();
+}
+
+const C=300, R=210;
+function pt(i,v){const a=-Math.PI/2 + i*2*Math.PI/AX.length, r=R*v/SCALE;
+  return [C+r*Math.cos(a), C+r*Math.sin(a)];}
+function poly(get){return AX.map((a,i)=>pt(i,get(a)).map(n=>n.toFixed(1)).join(',')).join(' ');}
+
+function render(){
+  const N=AX.length; let g='';
+  for(let k=1;k<=SCALE;k++)
+    g+=`<polygon class="ring" points="${AX.map((a,i)=>pt(i,k).map(n=>n.toFixed(1)).join(',')).join(' ')}"/>`;
+  for(let i=0;i<N;i++){const [x,y]=pt(i,SCALE);
+    g+=`<line class="spoke" x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`;}
+  // labels
+  AX.forEach((a,i)=>{
+    const ang=-Math.PI/2 + i*2*Math.PI/N, [x,y]=pt(i,SCALE+0.62);
+    const cos=Math.cos(ang);
+    const anchor = Math.abs(cos)<0.3?'middle':cos>0?'start':'end';
+    const words=a.name.split(' '); const lines=[];
+    let curl=''; words.forEach(w=>{ if((curl+' '+w).trim().length>14){lines.push(curl.trim());curl=w;} else curl+=' '+w;}); if(curl.trim())lines.push(curl.trim());
+    const dy = y<C-4?-(lines.length-1)*13:(y>C+4?0:-(lines.length-1)*6);
+    g+=lines.map((ln,li)=>`<text class="axis-label" x="${x.toFixed(1)}" y="${(y+dy+li*13).toFixed(1)}" text-anchor="${anchor}">${ln}</text>`).join('');
+  });
+  // baseline then current
+  g+=`<polygon class="poly-base" points="${poly(a=>BASE[a.name]??0)}"/>`;
+  g+=`<polygon class="poly-cur" points="${poly(a=>cur[a.name]??0)}"/>`;
+  AX.forEach((a,i)=>{const [x,y]=pt(i,cur[a.name]??0);
+    g+=`<circle class="vtx" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" data-i="${i}"/>`;});
+  $('radar').innerHTML=g;
+  $('radar').querySelectorAll('.vtx').forEach(c=>{
+    c.onmousemove=e=>{const a=AX[+c.dataset.i], b=BASE[a.name]??0, n=cur[a.name]??0, d=+(n-b).toFixed(1);
+      const t=$('tip'); t.textContent=`${a.name}: ${n}/${SCALE}${d?`  (${d>0?'+':''}${d} vs base)`:''}`;
+      t.style.left=(e.clientX+12)+'px'; t.style.top=(e.clientY-8)+'px'; t.style.opacity=1;};
+    c.onmouseleave=()=>$('tip').style.opacity=0;
+  });
+  renderStats();
+}
+
+function renderStats(){
+  const avgN=AX.reduce((s,a)=>s+(cur[a.name]??0),0)/AX.length;
+  const avgB=AX.reduce((s,a)=>s+(BASE[a.name]??0),0)/AX.length;
+  const d=+(avgN-avgB).toFixed(2);
+  $('avg-now').textContent=avgN.toFixed(1);
+  const dd=$('avg-delta');
+  dd.textContent = d>0?`▲ +${d} since baseline`:d<0?`▼ ${d} since baseline`:`• even with baseline`;
+  dd.className='delta '+(d>0?'up':d<0?'down':'flat');
+  $('progress-hint').textContent = HIST.length<=1 && d===0
+    ? 'Baseline set today — as you update your scores, the dashed outline stays put so you can see how far you have come.'
+    : `Averaging across all ${AX.length} skills.`;
+  $('axlist').innerHTML = AX.map(a=>{
+    const n=cur[a.name]??0, b=BASE[a.name]??0, dl=+(n-b).toFixed(1);
+    const cls=dl>0?'up':dl<0?'down':'flat', sym=dl>0?`▲ +${dl}`:dl<0?`▼ ${dl}`:'•';
+    return `<div class="axrow"><div class="axname">${a.name}<span class="axgroup">${a.group}</span></div>
+      <div class="axval">${n}</div><div class="axdelta ${cls}">${sym}</div></div>`;
+  }).join('');
+  $('tbody').innerHTML = AX.map(a=>{
+    const n=cur[a.name]??0, b=BASE[a.name]??0, dl=+(n-b).toFixed(1);
+    return `<tr><td>${a.name}</td><td>${a.group}</td><td class="num">${b}</td><td class="num">${n}</td>
+      <td class="num ${dl>0?'up':dl<0?'down':'flat'}">${dl>0?'+':''}${dl}</td></tr>`;
+  }).join('');
+}
+
+function buildSliders(){
+  $('sliders').innerHTML = AX.map((a,i)=>`
+    <div class="slrow">
+      <label>${a.name}</label>
+      <input type="range" min="0" max="${SCALE}" step="0.5" value="${cur[a.name]}" data-name="${a.name}">
+      <span class="v" id="v-${i}">${cur[a.name]}</span>
+    </div>`).join('');
+  $('sliders').querySelectorAll('input').forEach((inp,i)=>{
+    inp.oninput=()=>{cur[inp.dataset.name]=+inp.value; $('v-'+i).textContent=(+inp.value).toFixed(1).replace(/\.0$/,''); render();};
+  });
+}
+
+function copy(text,msg){
+  navigator.clipboard?.writeText(text).then(()=>flash(msg)).catch(()=>fallback(text,msg));
+}
+function fallback(text,msg){const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy');flash(msg);}catch(e){flash('Copy failed — select manually');}t.remove();}
+function flash(m){const c=$('copied');c.textContent=m;setTimeout(()=>c.textContent='',2600);}
+
+function skillsJSON(){
+  const today=new Date().toISOString().slice(0,10);
+  return JSON.stringify({
+    owner:'Aishwarya Agarwal', scale:SCALE, updated:today,
+    note:'Self-assessed, 0-5. Edit these scores as you grow (or use Edit mode on the page and copy the result back here).',
+    axes: AX.map(a=>({name:a.name, group:a.group, score:cur[a.name]}))
+  }, null, 1);
+}
+function historyJSON(){
+  const today=new Date().toISOString().slice(0,10);
+  const scores={}; AX.forEach(a=>scores[a.name]=cur[a.name]);
+  const next=HIST.filter(h=>h.date!==today).concat([{date:today,label:'Update',scores}]);
+  return JSON.stringify(next, null, 1);
+}
+
+$('btn-edit').onclick=()=>{$('edit').classList.toggle('show');$('btn-edit').classList.toggle('on');
+  if($('edit').classList.contains('show'))$('edit').scrollIntoView({behavior:'smooth'});};
+$('btn-table').onclick=()=>{$('tableview').classList.toggle('show');$('btn-table').classList.toggle('on');
+  if($('tableview').classList.contains('show'))$('tableview').scrollIntoView({behavior:'smooth'});};
+$('copy-skills').onclick=()=>copy(skillsJSON(),'skills.json copied — paste into the repo');
+$('copy-snapshot').onclick=()=>copy(historyJSON(),'history.json copied — paste into the repo');
+$('reset-edit').onclick=()=>{cur=JSON.parse(JSON.stringify(saved));buildSliders();render();flash('Reset to saved scores');};
+
+// theme toggle (light/dark/auto cycle)
+let theme=null;
+$('btn-theme').onclick=()=>{
+  theme = theme==='dark'?'light':theme==='light'?null:'dark';
+  if(theme) document.documentElement.setAttribute('data-theme',theme);
+  else document.documentElement.removeAttribute('data-theme');
+};
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Deploy config for the Skills Radar site, a second Netlify site from the same
+# repo as NextGig. When creating the site, set the base directory to
+# growth/skills-radar in Netlify; it then reads this file and publishes this
+# folder as-is (no build step — plain HTML + JSON).
+
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*.json"
+  [headers.values]
+    Cache-Control = "no-cache"

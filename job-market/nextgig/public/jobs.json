@@ -2,6 +2,7 @@
  {
   "co": "Databricks",
   "title": "Delivery Solutions Architect - Startups & Emerging Enterprise",
+  "domain": "Data & AI Infrastructure",
   "city": "",
   "st": "CA",
   "zip": "",
@@ -13,7 +14,7 @@
   "max": null,
   "lca": 89,
   "deg": "bachelors",
-  "age": 8,
+  "age": 9,
   "posted": "2026-07-15",
   "src": "Greenhouse",
   "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8549248002"
@@ -21,6 +22,7 @@
  {
   "co": "Databricks",
   "title": "Manager, Forward Deployed Engineering - Public Sector",
+  "domain": "Data & AI Infrastructure",
   "city": "",
   "st": "MD",
   "zip": "",
@@ -40,6 +42,7 @@
  {
   "co": "Databricks",
   "title": "Partner Engineer: Partner Intelligence, AI & Apps",
+  "domain": "Data & AI Infrastructure",
   "city": "San Francisco",
   "st": "CA",
   "zip": "",
@@ -59,6 +62,7 @@
  {
   "co": "Databricks",
   "title": "Senior Software Engineer, AI Native Web Platform",
+  "domain": "Data & AI Infrastructure",
   "city": "Mountain View",
   "st": "CA",
   "zip": "",
@@ -78,6 +82,7 @@
  {
   "co": "Databricks",
   "title": "Solutions Architect",
+  "domain": "Data & AI Infrastructure",
   "city": "",
   "st": "AZ",
   "zip": "",
@@ -97,6 +102,7 @@
  {
   "co": "Databricks",
   "title": "Solutions Architect - Financial Services (Hunter) ",
+  "domain": "Data & AI Infrastructure",
   "city": "",
   "st": "GA",
   "zip": "",
@@ -116,6 +122,7 @@
  {
   "co": "Databricks",
   "title": "Solutions Architect - Public Sector (SLED)",
+  "domain": "Data & AI Infrastructure",
   "city": "",
   "st": "TX",
   "zip": "",
@@ -127,7 +134,7 @@
   "max": null,
   "lca": 89,
   "deg": "none",
-  "age": 2,
+  "age": 3,
   "posted": "2026-07-21",
   "src": "Greenhouse",
   "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8633741002"
@@ -135,6 +142,7 @@
  {
   "co": "Databricks",
   "title": "Solutions Architect, Retail - Travel & Hospitality ",
+  "domain": "Data & AI Infrastructure",
   "city": "Seattle",
   "st": "WA",
   "zip": "",
@@ -154,6 +162,7 @@
  {
   "co": "Databricks",
   "title": "Sr. Engineering Manager, AI Runtime",
+  "domain": "Data & AI Infrastructure",
   "city": "Mountain View",
   "st": "CA",
   "zip": "",
@@ -173,6 +182,7 @@
  {
   "co": "Databricks",
   "title": "Sr. Field Technical Program Manager, Forward Deployed Engineering - Public Sector",
+  "domain": "Data & AI Infrastructure",
   "city": "Washington",
   "st": "DC",
   "zip": "",
@@ -184,7 +194,7 @@
   "max": null,
   "lca": 89,
   "deg": "none",
-  "age": 21,
+  "age": 22,
   "posted": "2026-07-02",
   "src": "Greenhouse",
   "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8549259002"
@@ -192,6 +202,7 @@
  {
   "co": "Databricks",
   "title": "Sr. Forward Deployed Engineer (FDE) - Digital Native Business ",
+  "domain": "Data & AI Infrastructure",
   "city": "Mountain View",
   "st": "CA",
   "zip": "",
@@ -211,6 +222,27 @@
  {
   "co": "Databricks",
   "title": "Sr. Forward Deployed Engineer (FDE) - Retail",
+  "domain": "Data & AI Infrastructure",
+  "city": "Chicago",
+  "st": "IL",
+  "zip": "",
+  "lat": 41.8858,
+  "lng": -87.6181,
+  "lvl": "Senior",
+  "type": "Onsite",
+  "min": null,
+  "max": null,
+  "lca": 89,
+  "deg": "none",
+  "age": 0,
+  "posted": "2026-07-23",
+  "src": "Greenhouse",
+  "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8647669002"
+ },
+ {
+  "co": "Databricks",
+  "title": "Sr. Forward Deployed Engineer (FDE) - Retail",
+  "domain": "Data & AI Infrastructure",
   "city": "Denver",
   "st": "CO",
   "zip": "",
@@ -230,44 +262,7 @@
  {
   "co": "Databricks",
   "title": "Sr. Forward Deployed Engineer (FDE) - Retail",
-  "city": "",
-  "st": "CA",
-  "zip": "",
-  "lat": 36.9128,
-  "lng": -120.1567,
-  "lvl": "Senior",
-  "type": "Remote",
-  "min": null,
-  "max": null,
-  "lca": 89,
-  "deg": "none",
-  "age": 0,
-  "posted": "2026-07-23",
-  "src": "Greenhouse",
-  "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8647677002"
- },
- {
-  "co": "Databricks",
-  "title": "Sr. Forward Deployed Engineer (FDE) - Retail",
-  "city": "Austin",
-  "st": "TX",
-  "zip": "",
-  "lat": 30.2107,
-  "lng": -97.9427,
-  "lvl": "Senior",
-  "type": "Onsite",
-  "min": null,
-  "max": null,
-  "lca": 89,
-  "deg": "none",
-  "age": 0,
-  "posted": "2026-07-23",
-  "src": "Greenhouse",
-  "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8647668002"
- },
- {
-  "co": "Databricks",
-  "title": "Sr. Forward Deployed Engineer (FDE) - Retail",
+  "domain": "Data & AI Infrastructure",
   "city": "Dallas",
   "st": "TX",
   "zip": "",
@@ -287,11 +282,12 @@
  {
   "co": "Databricks",
   "title": "Sr. Forward Deployed Engineer (FDE) - Retail",
-  "city": "Chicago",
-  "st": "IL",
+  "domain": "Data & AI Infrastructure",
+  "city": "Austin",
+  "st": "TX",
   "zip": "",
-  "lat": 41.8858,
-  "lng": -87.6181,
+  "lat": 30.2107,
+  "lng": -97.9427,
   "lvl": "Senior",
   "type": "Onsite",
   "min": null,
@@ -301,11 +297,32 @@
   "age": 0,
   "posted": "2026-07-23",
   "src": "Greenhouse",
-  "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8647669002"
+  "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8647668002"
+ },
+ {
+  "co": "Databricks",
+  "title": "Sr. Forward Deployed Engineer (FDE) - Retail",
+  "domain": "Data & AI Infrastructure",
+  "city": "",
+  "st": "CA",
+  "zip": "",
+  "lat": 36.9128,
+  "lng": -120.1567,
+  "lvl": "Senior",
+  "type": "Remote",
+  "min": null,
+  "max": null,
+  "lca": 89,
+  "deg": "none",
+  "age": 0,
+  "posted": "2026-07-23",
+  "src": "Greenhouse",
+  "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8647677002"
  },
  {
   "co": "Databricks",
   "title": "Sr. Solutions Architect - Digital Native Business, Strategics",
+  "domain": "Data & AI Infrastructure",
   "city": "",
   "st": "NV",
   "zip": "",
@@ -325,6 +342,7 @@
  {
   "co": "Databricks",
   "title": "Sr. Solutions Architect - Financial Services (Fintech / Data Providers) ",
+  "domain": "Data & AI Infrastructure",
   "city": "",
   "st": "GA",
   "zip": "",
@@ -344,6 +362,7 @@
  {
   "co": "Databricks",
   "title": "Staff Machine Learning Engineer, CustomerLake (ML/LLM)",
+  "domain": "Data & AI Infrastructure",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -363,6 +382,7 @@
  {
   "co": "Databricks",
   "title": "Staff Research Engineer, Data Agents",
+  "domain": "Data & AI Infrastructure",
   "city": "San Francisco",
   "st": "CA",
   "zip": "",
@@ -382,6 +402,7 @@
  {
   "co": "Databricks",
   "title": "Staff Software Engineer, AI Native Web Platform",
+  "domain": "Data & AI Infrastructure",
   "city": "Mountain View",
   "st": "CA",
   "zip": "",
@@ -401,6 +422,7 @@
  {
   "co": "Stripe",
   "title": " AI Product Manager, Professional Services ",
+  "domain": "Fintech \u00b7 Payments",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -412,7 +434,7 @@
   "max": null,
   "lca": 86,
   "deg": "none",
-  "age": 9,
+  "age": 10,
   "posted": "2026-07-14",
   "src": "Greenhouse",
   "url": "https://stripe.com/jobs/search?gh_jid=8064526"
@@ -420,6 +442,7 @@
  {
   "co": "Stripe",
   "title": "Data Analyst, Financial Data Engineering",
+  "domain": "Fintech \u00b7 Payments",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -431,7 +454,7 @@
   "max": null,
   "lca": 86,
   "deg": "none",
-  "age": 1,
+  "age": 2,
   "posted": "2026-07-22",
   "src": "Greenhouse",
   "url": "https://stripe.com/jobs/search?gh_jid=8070572"
@@ -439,6 +462,7 @@
  {
   "co": "Stripe",
   "title": "Internal Audit Data Analytics Lead",
+  "domain": "Fintech \u00b7 Payments",
   "city": "Toronto",
   "st": "NY",
   "zip": "",
@@ -458,6 +482,7 @@
  {
   "co": "Stripe",
   "title": "Specialist Solution Architect, Money Management",
+  "domain": "Fintech \u00b7 Payments",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -477,6 +502,7 @@
  {
   "co": "Datadog",
   "title": "Manager, Strategic Sourcing, AI Infrastructure & Services",
+  "domain": "DevTools \u00b7 Observability",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -496,6 +522,7 @@
  {
   "co": "Datadog",
   "title": "Product Strategy and Corporate Development Lead, AI",
+  "domain": "DevTools \u00b7 Observability",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -515,6 +542,7 @@
  {
   "co": "Datadog",
   "title": "Senior Product Manager \u2013 Observability Data Platform",
+  "domain": "DevTools \u00b7 Observability",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -534,6 +562,7 @@
  {
   "co": "Datadog",
   "title": "Senior Product Manager - Regulated Industries, Data Center and New Market Expansions",
+  "domain": "DevTools \u00b7 Observability",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -553,6 +582,7 @@
  {
   "co": "Datadog",
   "title": "Senior Product Solutions Architect - Synthetics",
+  "domain": "DevTools \u00b7 Observability",
   "city": "Boston",
   "st": "MA",
   "zip": "",
@@ -572,6 +602,7 @@
  {
   "co": "Datadog",
   "title": "Senior Software Engineer - Streaming Platform Client",
+  "domain": "DevTools \u00b7 Observability",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -591,6 +622,7 @@
  {
   "co": "Datadog",
   "title": "Staff Product Manager, Observability Data Platforms",
+  "domain": "DevTools \u00b7 Observability",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -610,6 +642,7 @@
  {
   "co": "Klaviyo",
   "title": "AI Enablement Program Manager",
+  "domain": "MarTech",
   "city": "Boston",
   "st": "MA",
   "zip": "",
@@ -629,6 +662,7 @@
  {
   "co": "Klaviyo",
   "title": "Analytics Engineer",
+  "domain": "MarTech",
   "city": "Boston",
   "st": "MA",
   "zip": "",
@@ -648,6 +682,7 @@
  {
   "co": "Klaviyo",
   "title": "Manager, GTM Strategic Intelligence & Advanced Analytics",
+  "domain": "MarTech",
   "city": "Boston",
   "st": "MA",
   "zip": "",
@@ -659,7 +694,7 @@
   "max": null,
   "lca": 2,
   "deg": "none",
-  "age": 16,
+  "age": 17,
   "posted": "2026-07-07",
   "src": "Greenhouse",
   "url": "https://www.klaviyo.com/careers/jobs/7797613003?gh_jid=7797613003"
@@ -667,6 +702,7 @@
  {
   "co": "Klaviyo",
   "title": "Manager, GTM Strategic Intelligence & Advanced Analytics",
+  "domain": "MarTech",
   "city": "Denver",
   "st": "CO",
   "zip": "",
@@ -678,7 +714,7 @@
   "max": null,
   "lca": 2,
   "deg": "none",
-  "age": 16,
+  "age": 17,
   "posted": "2026-07-07",
   "src": "Greenhouse",
   "url": "https://www.klaviyo.com/careers/jobs/7797768003?gh_jid=7797768003"
@@ -686,6 +722,7 @@
  {
   "co": "Klaviyo",
   "title": "Senior Lead Software Engineer - Data Platform",
+  "domain": "MarTech",
   "city": "Boston",
   "st": "MA",
   "zip": "",
@@ -705,6 +742,7 @@
  {
   "co": "Duolingo",
   "title": "Staff AI Research Engineer ",
+  "domain": "EdTech",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -716,7 +754,7 @@
   "max": null,
   "lca": 5,
   "deg": "none",
-  "age": 27,
+  "age": 28,
   "posted": "2026-06-26",
   "src": "Greenhouse",
   "url": "https://careers.duolingo.com/jobs/8610353002?gh_jid=8610353002"
@@ -724,6 +762,7 @@
  {
   "co": "Duolingo",
   "title": "Staff AI Research Engineer ",
+  "domain": "EdTech",
   "city": "Pittsburgh",
   "st": "PA",
   "zip": "",
@@ -735,7 +774,7 @@
   "max": null,
   "lca": 5,
   "deg": "none",
-  "age": 27,
+  "age": 28,
   "posted": "2026-06-26",
   "src": "Greenhouse",
   "url": "https://careers.duolingo.com/jobs/8610345002?gh_jid=8610345002"
@@ -743,6 +782,7 @@
  {
   "co": "Chime",
   "title": "Engineering Manager, AI & App Experience",
+  "domain": "Fintech \u00b7 Banking",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -762,6 +802,7 @@
  {
   "co": "Chime",
   "title": "Senior Data Scientist, AI & App Experience",
+  "domain": "Fintech \u00b7 Banking",
   "city": "San Francisco",
   "st": "CA",
   "zip": "",
@@ -781,6 +822,7 @@
  {
   "co": "Chime",
   "title": "Senior Data Scientist, Lending",
+  "domain": "Fintech \u00b7 Banking",
   "city": "San Francisco",
   "st": "CA",
   "zip": "",
@@ -792,7 +834,7 @@
   "max": null,
   "lca": 0,
   "deg": "none",
-  "age": 24,
+  "age": 25,
   "posted": "2026-06-29",
   "src": "Greenhouse",
   "url": "https://boards.greenhouse.io/chime/jobs/8612037002?gh_jid=8612037002"
@@ -800,6 +842,7 @@
  {
   "co": "Chime",
   "title": "Senior Engineering Manager, Data",
+  "domain": "Fintech \u00b7 Banking",
   "city": "San Francisco",
   "st": "CA",
   "zip": "",
@@ -811,7 +854,7 @@
   "max": null,
   "lca": 0,
   "deg": "none",
-  "age": 4,
+  "age": 5,
   "posted": "2026-07-19",
   "src": "Greenhouse",
   "url": "https://boards.greenhouse.io/chime/jobs/8606606002?gh_jid=8606606002"
@@ -819,6 +862,7 @@
  {
   "co": "Chime",
   "title": "Senior Mobile Cross Platform Engineer",
+  "domain": "Fintech \u00b7 Banking",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -838,6 +882,7 @@
  {
   "co": "Chime",
   "title": "Staff Data Scientist, Finance Analytics",
+  "domain": "Fintech \u00b7 Banking",
   "city": "San Francisco",
   "st": "CA",
   "zip": "",
@@ -857,6 +902,7 @@
  {
   "co": "Chime",
   "title": "Staff Software Engineer, AI & App Experience",
+  "domain": "Fintech \u00b7 Banking",
   "city": "New York",
   "st": "NY",
   "zip": "",
@@ -876,6 +922,7 @@
  {
   "co": "Palantir",
   "title": "Software Engineer - Edge AI Systems",
+  "domain": "Data \u00b7 Government & Defense",
   "city": "Seattle",
   "st": "WA",
   "zip": "",

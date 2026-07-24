@@ -5,6 +5,7 @@ Personal projects, one directory each, grouped by the itch they scratch.
 | Project | What it is |
 |---|---|
 | [job-market/nextgig](job-market/nextgig) | A live map of data, AI and analytics roles at employers with a real visa sponsorship record. |
+| [growth/skills-radar](growth/skills-radar) | A living radar chart of my data & AI engineering skills, tracked over time. |
 
 ## Conventions
 
