@@ -53,6 +53,7 @@
 .tab:hover{color:var(--ink)}
 .tab.on{color:var(--signal);border-bottom-color:var(--signal)}
 
+[hidden]{display:none!important}   /* author display rules below would otherwise beat the hidden attribute */
 .body{display:flex;flex:1;min-height:0}
 .filters{width:242px;flex-shrink:0;border-right:1px solid var(--line);padding:16px;
   overflow-y:auto;background:var(--card)}
@@ -161,6 +162,19 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
 .wheat i{width:8px;height:16px;border-radius:3px;background:var(--line)}
 .wheat i.f{background:var(--sponsor)}
 
+/* emerging tab */
+.emerging{flex:1;overflow-y:auto;padding:18px 20px;min-height:0;background:var(--paper)}
+.emerging .watch-filters input{width:auto;min-width:220px}
+.ehdr,.erow{display:grid;grid-template-columns:64px 1fr;gap:14px;align-items:center}
+.ehdr{padding:0 14px 8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);font-weight:600}
+.erow{padding:10px 14px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px;
+  background:var(--card);box-shadow:var(--shadow);transition:border-color .12s}
+.erow:hover{border-color:var(--signal)}
+.ecount{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--signal)}
+.ebar{height:5px;border-radius:3px;background:var(--signal);opacity:.85;margin-top:5px;min-width:4px}
+.etitle{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:500;color:var(--ink)}
+
 .note{padding:10px 20px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);background:var(--card)}
 .note .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--sponsor);
   margin-right:7px;vertical-align:middle;box-shadow:0 0 0 3px rgba(15,162,107,.16)}
@@ -186,6 +200,7 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
   <div class="tabs">
     <button class="tab on" data-view="jobs">Open roles</button>
     <button class="tab" data-view="watch">Worth watching</button>
+    <button class="tab" data-view="emerging">Emerging titles</button>
   </div>
 
   <div class="body" id="view-jobs">
@@ -235,6 +250,19 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
       </div>
     </div>
     <div id="watch-list"></div>
+  </div>
+
+  <div class="emerging" id="view-emerging" hidden>
+    <div class="watch-head">
+      <p>Titles the market is posting that name your domain or a senior role, but
+      not the clean pairing the map filters on &mdash; so they never appear on it.
+      This is the vocabulary to watch: new specialisations before they have a
+      settled name. Ranked by how many current postings use them.</p>
+      <div class="watch-filters">
+        <input type="text" id="e-find" placeholder="Filter titles, e.g. platform, ai">
+      </div>
+    </div>
+    <div id="emerging-list"></div>
   </div>
 
   <div class="note"><span id="src-note">Loading</span></div>
@@ -315,6 +343,7 @@ const TAGS={cadence:"Posts regularly, quiet now",funding:"Recent raise",adjacent
 
 const $=id=>document.getElementById(id);
 const conf=n=>n===0?0:n<25?1:n<100?2:n<400?3:4;
+const EMERGING=[];
 const fill=(el,v)=>v.forEach(x=>el.insertAdjacentHTML('beforeend',`<option>${x}</option>`));
 
 function rebuildOptions(){
@@ -486,20 +515,38 @@ function renderWatch(){
 Object.entries(TAGS).forEach(([k,v])=>$('w-why').insertAdjacentHTML('beforeend',`<option value="${k}">${v}</option>`));
 $('w-state').oninput=renderWatch; $('w-why').oninput=renderWatch;
 
+function renderEmerging(){
+  const q=$('e-find').value.trim().toLowerCase();
+  const rows=EMERGING.filter(e=>!q||e.title.toLowerCase().includes(q));
+  const max=EMERGING.reduce((m,e)=>Math.max(m,e.n),1);
+  $('emerging-list').innerHTML=
+    `<div class="ehdr"><span>Postings</span><span>Title</span></div>`+
+    (rows.length?rows.map(e=>`<div class="erow">
+      <div><div class="ecount">${e.n}&times;</div><div class="ebar" style="width:${Math.round(100*e.n/max)}%"></div></div>
+      <div class="etitle">${e.title.replace(/[<>]/g,'')}</div>
+    </div>`).join('')
+    :`<div class="empty">No titles match.</div>`);
+}
+$('e-find').oninput=renderEmerging;
+
+const PANELS={jobs:'view-jobs',watch:'view-watch',emerging:'view-emerging'};
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
-  const jobs=t.dataset.view==='jobs';
-  $('view-jobs').hidden=!jobs; $('view-watch').hidden=jobs;
-  if(jobs) setTimeout(()=>{map.invalidateSize();fit();},30); else renderWatch();
+  const v=t.dataset.view;
+  Object.entries(PANELS).forEach(([k,id])=>$(id).hidden=(k!==v));
+  if(v==='jobs') setTimeout(()=>{map.invalidateSize();fit();},30);
+  else if(v==='watch') renderWatch();
+  else renderEmerging();
 });
 
 async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r.ok?await r.json():null; }catch(e){ return null; } }
 
 (async function boot(){
-  const [j,w,meta] = await Promise.all([grab('jobs.json'), grab('watchlist.json'), grab('meta.json')]);
+  const [j,w,meta,e] = await Promise.all([grab('jobs.json'), grab('watchlist.json'), grab('meta.json'), grab('emerging.json')]);
   let live=false;
   if(Array.isArray(j)&&j.length){ JOBS.length=0; JOBS.push(...j); live=true; }
   if(Array.isArray(w)&&w.length){ WATCH.length=0; WATCH.push(...w); }
+  if(Array.isArray(e)&&e.length){ EMERGING.length=0; EMERGING.push(...e); }
   if(live){
     let when='';
     if(meta&&meta.updated){
@@ -518,13 +565,13 @@ async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r
   } else {
     $('src-note').innerHTML = '<b class="dot stale"></b>Showing bundled sample data. Run <code>scripts/ingest.py</code> to generate <code>jobs.json</code>, this switches to live on its own.';
   }
-  rebuildOptions(); cityOptions(''); render(); renderWatch();
+  rebuildOptions(); cityOptions(''); render(); renderWatch(); renderEmerging();
 })();
 </script>
 
   <p class="kicker">Built from public ATS job boards and US Department of Labor visa filing records.
   Sponsorship signal reflects past H-1B filings and is not a guarantee that an employer will sponsor today.
-  <a href="https://github.com/aagarwal-29/nextgig">Source on GitHub</a></p>
+  <a href="https://github.com/Aishwaryagarwal/The-Itch">Source on GitHub</a></p>
 </div>
 </body>
 </html>

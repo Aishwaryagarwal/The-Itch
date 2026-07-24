@@ -528,6 +528,16 @@ def main():
     json.dump(watch, open(wpath, "w"), indent=1)
     print(f"wrote {len(watch)} watchlist employers -> {wpath}")
 
+    # Emerging titles: postings that name a data/AI domain OR a senior role word
+    # but not the clean pairing the taxonomy keeps, so they never make the map.
+    # Surfaced as a list precisely because they are the vocabulary the market is
+    # using that the filter does not yet recognise. Ranked by how often they
+    # appear; the count is the whole point.
+    emerging = [{"title": t, "n": n} for t, n in review_queue.most_common(120)]
+    epath = os.path.join(os.path.dirname(args.out) or ".", "emerging.json")
+    json.dump(emerging, open(epath, "w"), indent=1)
+    print(f"wrote {len(emerging)} emerging titles -> {epath}")
+
 
 if __name__ == "__main__":
     main()

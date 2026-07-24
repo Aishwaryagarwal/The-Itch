@@ -7,7 +7,7 @@ name: nextgig refresh
 
 on:
   schedule:
-    - cron: '0 9 * * 1-5'      # 09:00 UTC, weekday mornings
+    - cron: '0 9 * * 1'        # 09:00 UTC every Monday — once a week
   workflow_dispatch:            # manual "Run workflow" button in the Actions tab
 
 permissions:
