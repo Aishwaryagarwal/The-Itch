@@ -51,7 +51,7 @@
   "max": null,
   "lca": 0,
   "deg": "none",
-  "age": 0,
+  "age": 1,
   "posted": "2026-07-22",
   "src": "Greenhouse",
   "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8643542002"
@@ -89,7 +89,7 @@
   "max": null,
   "lca": 0,
   "deg": "none",
-  "age": 24,
+  "age": 25,
   "posted": "2026-06-29",
   "src": "Greenhouse",
   "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8605160002"
@@ -146,7 +146,7 @@
   "max": null,
   "lca": 0,
   "deg": "none",
-  "age": 14,
+  "age": 15,
   "posted": "2026-07-08",
   "src": "Greenhouse",
   "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8625367002"
@@ -355,7 +355,7 @@
   "max": null,
   "lca": 0,
   "deg": "none",
-  "age": 22,
+  "age": 23,
   "posted": "2026-06-30",
   "src": "Greenhouse",
   "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8614863002"
@@ -374,7 +374,7 @@
   "max": null,
   "lca": 0,
   "deg": "bachelors",
-  "age": 26,
+  "age": 27,
   "posted": "2026-06-26",
   "src": "Greenhouse",
   "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8604954002"
@@ -704,25 +704,6 @@
  },
  {
   "co": "Klaviyo",
-  "title": "Principal Engineer, Data Infrastructure",
-  "city": "Boston",
-  "st": "MA",
-  "zip": "",
-  "lat": 42.3576,
-  "lng": -71.0684,
-  "lvl": "Lead",
-  "type": "Onsite",
-  "min": null,
-  "max": null,
-  "lca": 0,
-  "deg": "none",
-  "age": 29,
-  "posted": "2026-06-23",
-  "src": "Greenhouse",
-  "url": "https://www.klaviyo.com/careers/jobs/7559751003?gh_jid=7559751003"
- },
- {
-  "co": "Klaviyo",
   "title": "Senior Lead Software Engineer - Data Platform",
   "city": "Boston",
   "st": "MA",
@@ -906,7 +887,7 @@
   "max": null,
   "lca": 0,
   "deg": "none",
-  "age": 14,
+  "age": 15,
   "posted": "2026-07-09",
   "src": "Greenhouse",
   "url": "https://boards.greenhouse.io/chime/jobs/8624510002?gh_jid=8624510002"
@@ -944,7 +925,7 @@
   "max": null,
   "lca": 0,
   "deg": "none",
-  "age": 0,
+  "age": 1,
   "posted": "2026-07-22",
   "src": "Lever",
   "url": "https://jobs.lever.co/palantir/67110929-adea-41c3-851a-8882e222d9e4"
