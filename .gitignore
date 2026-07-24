@@ -13,8 +13,10 @@ venv/
 # Scratch output from discover.py
 **/data/discovered.json
 
-# Local Claude Code settings
+# Local editor and tool settings
 .claude/
+.vscode/
+.idea/
 
 # iCloud sync artifacts
 *.icloud
