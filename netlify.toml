@@ -1,0 +1,14 @@
+# Netlify deploy config for the NextGig site.
+# The repo is an umbrella ("The Itch"); the deployable site is the static
+# job-market/nextgig/public/ folder. No build step — it is plain HTML/JSON.
+# Connecting this repo as a new Netlify site picks these up automatically.
+
+[build]
+  publish = "job-market/nextgig/public"
+  command = ""
+
+# Always serve the freshest generated JSON; the daily workflow overwrites them.
+[[headers]]
+  for = "/*.json"
+  [headers.values]
+    Cache-Control = "no-cache"
