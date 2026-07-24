@@ -251,8 +251,86 @@ ALIAS = {
 SPLIT = re.compile(r"\s*(?:;|\||/|\bor\b|\band\b)\s*", re.I)
 STRIP = re.compile(r"^\s*(remote|hybrid|onsite|on-site|in office)\s*[-,:]?\s*", re.I)
 
+# ---- world geocoding (everything the US table can't place) ----
+WORLD = os.path.join(PROJECT, "data", "worldgeo.json")
+_wgeo = json.load(open(WORLD)) if os.path.exists(WORLD) else {"countries": {}, "cities": {}}
+
+# country name / shorthand -> ISO2. US is deliberately absent: US strings resolve
+# through the richer state table first, and only non-US falls through to here.
+COUNTRY_ALIAS = {
+ "india": "IN", "bharat": "IN",
+ "united arab emirates": "AE", "uae": "AE", "u.a.e": "AE", "u.a.e.": "AE", "emirates": "AE",
+ "singapore": "SG",
+ "qatar": "QA",
+ "saudi arabia": "SA", "ksa": "SA", "saudi": "SA", "kingdom of saudi arabia": "SA",
+ "bahrain": "BH",
+ "hong kong": "HK", "hong kong sar": "HK", "hongkong": "HK",
+ "japan": "JP",
+ "south korea": "KR", "korea": "KR", "republic of korea": "KR",
+ "australia": "AU", "malaysia": "MY",
+ "united kingdom": "GB", "uk": "GB", "u.k": "GB", "u.k.": "GB", "england": "GB",
+ "scotland": "GB", "wales": "GB", "great britain": "GB", "britain": "GB",
+ "ireland": "IE", "france": "FR", "germany": "DE",
+ "netherlands": "NL", "the netherlands": "NL", "holland": "NL",
+ "sweden": "SE", "spain": "ES", "portugal": "PT", "poland": "PL",
+ "canada": "CA", "brazil": "BR", "brasil": "BR", "mexico": "MX", "méxico": "MX",
+ "israel": "IL", "argentina": "AR", "costa rica": "CR",
+}
+# city name -> ISO2, so a bare "Dubai" or "Bengaluru" still resolves to a country.
+CITY_ISO = {}
+for _k in _wgeo["cities"]:
+    _name, _iso = _k.rsplit("|", 1)
+    CITY_ISO.setdefault(_name, _iso)
+
 
 def geocode(place):
+    """US first (richer table), then the rest of the world. None if unresolvable."""
+    g = geocode_us(place)
+    if g:
+        g.setdefault("country", "United States"); g.setdefault("iso", "US")
+        return g
+    return geocode_intl(place)
+
+
+def geocode_intl(place):
+    """Resolve 'City, Country' (or a bare city / country) outside the US."""
+    if not place:
+        return None
+    raw = SPLIT.split(place.strip())[0]
+    raw = STRIP.sub("", raw).strip(" ,-")
+    if not raw or re.fullmatch(r"(remote|anywhere|multiple locations|global|worldwide)", raw, re.I):
+        return None
+    parts = [p.strip() for p in raw.split(",") if p.strip()]
+    iso = None
+    for p in reversed(parts):                       # country is usually last
+        a = COUNTRY_ALIAS.get(p.lower())
+        if a:
+            iso = a; break
+    city = ""
+    if parts:
+        cand = parts[0]
+        cand_iso = COUNTRY_ALIAS.get(cand.lower())
+        if cand_iso and len(parts) == 1:            # bare country, or a city-state
+            iso = iso or cand_iso
+            if cand.lower() in CITY_ISO:
+                city = cand
+        elif cand.lower() not in COUNTRY_ALIAS:
+            city = cand
+    if not iso and city:                            # infer country from the city
+        iso = CITY_ISO.get(city.lower())
+    if not iso or iso not in _wgeo["countries"]:
+        return None
+    ckey = f"{city.lower()}|{iso}"
+    if city and ckey in _wgeo["cities"]:
+        lat, lng = _wgeo["cities"][ckey]
+    else:
+        c = _wgeo["countries"][iso]
+        lat, lng = c["lat"], c["lng"]               # country-level pin
+    return {"lat": lat, "lng": lng, "city": city.title() if city else "",
+            "st": "", "zip": "", "country": _wgeo["countries"][iso]["name"], "iso": iso}
+
+
+def geocode_us(place):
     """Parse 'City, ST' out of a messy ATS location string. None if unresolvable."""
     if not place:
         return None
@@ -499,6 +577,7 @@ def main():
             rows.append({
                 "co": slug.replace("-", " ").title(), "title": p["title"],
                 "domain": DOMAINS.get(slug, "Other"),
+                "country": g.get("country", ""), "iso": g.get("iso", ""),
                 "city": g["city"], "st": g["st"], "zip": g["zip"],
                 "lat": g["lat"], "lng": g["lng"],
                 "lvl": level_of(p["title"]),

@@ -245,8 +245,8 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
 
   <div class="body" id="view-jobs">
     <div class="filters">
+      <label>Country</label><select id="f-country"><option value="">All countries</option></select>
       <label>Domain</label><select id="f-domain"><option value="">All domains</option></select>
-      <label>State</label><select id="f-state"><option value="">All states</option></select>
       <label>City</label><select id="f-city"><option value="">All cities</option></select>
       <label>Title contains</label><input type="text" id="f-title" placeholder="e.g. analytics, platform">
       <label>Level</label><select id="f-level"><option value="">Any level</option></select>
@@ -259,7 +259,7 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
       </select>
       <label>Requirements</label>
       <div class="chk"><input type="checkbox" id="f-phd" checked><span>Hide PhD-required roles</span></div>
-      <div class="chk"><input type="checkbox" id="f-spon"><span>Only employers with H-1B record</span></div>
+      <div class="chk"><input type="checkbox" id="f-spon"><span>US roles at H-1B sponsors only</span></div>
       <button class="reset" id="reset">Clear all filters</button>
     </div>
 
@@ -272,9 +272,9 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
       </div>
       <div class="legend">
         <h4>Marker ring</h4>
-        <div><b style="background:var(--signal);border:2px solid var(--sponsor)"></b>Sponsors (H-1B record)</div>
-        <div><b style="background:var(--signal);border:2px solid var(--warn)"></b>No filing record</div>
-        <div style="margin-top:6px;font-size:10px;opacity:.75">Number = open roles at that site</div>
+        <div><b style="background:var(--signal);border:2px solid var(--sponsor)"></b>US · H-1B record</div>
+        <div><b style="background:var(--signal);border:2px solid var(--warn)"></b>US · no record / outside US</div>
+        <div style="margin-top:6px;font-size:10px;opacity:.75">Number = open roles at that site. Sponsorship data is US-only for now.</div>
       </div>
     </div>
 
@@ -418,20 +418,30 @@ const conf=n=>n===0?0:n<25?1:n<100?2:n<400?3:4;
 const EMERGING=[];
 const fill=(el,v)=>v.forEach(x=>el.insertAdjacentHTML('beforeend',`<option>${x}</option>`));
 
+// Target markets surface at the top of the Country list; everything else follows
+// alphabetically. Nothing is hidden — the whole world stays selectable.
+const TARGET_MARKETS=["India","United Arab Emirates","Singapore","United States",
+  "Qatar","Saudi Arabia","Bahrain","Hong Kong","Japan","South Korea","Australia","Malaysia"];
+function countryOrder(a,b){
+  const ia=TARGET_MARKETS.indexOf(a), ib=TARGET_MARKETS.indexOf(b);
+  if(ia>=0&&ib>=0) return ia-ib;
+  if(ia>=0) return -1; if(ib>=0) return 1;
+  return a.localeCompare(b);
+}
 function rebuildOptions(){
+  $('f-country').innerHTML='<option value="">All countries</option>';
   $('f-domain').innerHTML='<option value="">All domains</option>';
-  $('f-state').innerHTML='<option value="">All states</option>';
   $('f-level').innerHTML='<option value="">Any level</option>';
   $('f-type').innerHTML='<option value="">Any setup</option>';
   $('w-state').innerHTML='<option value="">All states</option>';
+  fill($('f-country'),[...new Set(JOBS.map(j=>j.country))].filter(Boolean).sort(countryOrder));
   fill($('f-domain'),[...new Set(JOBS.map(j=>j.domain))].filter(Boolean).sort());
-  fill($('f-state'),[...new Set(JOBS.map(j=>j.st))].filter(Boolean).sort());
   fill($('f-level'),["Mid","Senior","Staff","Lead","Manager","Director"]);
   fill($('f-type'),[...new Set(JOBS.map(j=>j.type))].filter(Boolean).sort());
   fill($('w-state'),[...new Set(WATCH.map(w=>w.st))].filter(Boolean).sort());
 }
 
-const map=L.map('map',{zoomControl:true,attributionControl:false,worldCopyJump:true}).setView([39.5,-96],4);
+const map=L.map('map',{zoomControl:true,attributionControl:false,worldCopyJump:true}).setView([22,40],2);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
   {maxZoom:19,opacity:.85}).addTo(map);
@@ -447,19 +457,19 @@ const cluster=L.markerClusterGroup({
 });
 let heat=null, mode='pins', sites=[], sel=null;
 
-function cityOptions(st){
+function cityOptions(country){
   const s=$('f-city'),cur=s.value;
   s.innerHTML='<option value="">All cities</option>';
-  const c=[...new Set(JOBS.filter(j=>!st||j.st===st).map(j=>j.city))].sort();
+  const c=[...new Set(JOBS.filter(j=>(!country||j.country===country)&&j.city).map(j=>j.city))].sort();
   fill(s,c); if(c.includes(cur)) s.value=cur;
 }
 
 function matches(j){
   const dom=$('f-domain').value;
-  const st=$('f-state').value,city=$('f-city').value,t=$('f-title').value.trim().toLowerCase();
+  const co=$('f-country').value,city=$('f-city').value,t=$('f-title').value.trim().toLowerCase();
   const lv=$('f-level').value,ty=$('f-type').value,pay=parseFloat($('f-pay').value);
   if(dom&&j.domain!==dom) return false;
-  if(st&&j.st!==st) return false;
+  if(co&&j.country!==co) return false;
   if(city&&j.city!==city) return false;
   if(t&&!(j.title+' '+j.co).toLowerCase().includes(t)) return false;
   if(lv&&j.lvl!==lv) return false;
@@ -467,7 +477,7 @@ function matches(j){
   if(!isNaN(pay)&&(!j.max||j.max<pay)) return false;
   if(j.age>+$('f-age').value) return false;
   if($('f-phd').checked&&j.deg==='phd') return false;
-  if($('f-spon').checked&&j.lca===0) return false;
+  if($('f-spon').checked&&!(j.iso==='US'&&j.lca>0)) return false;   // H-1B is US-only
   return true;
 }
 
@@ -477,7 +487,7 @@ function groupSites(rows){
   const m=new Map();
   rows.forEach(j=>{
     const k=`${j.co}|${j.lat}|${j.lng}`;
-    if(!m.has(k)) m.set(k,{co:j.co,city:j.city,st:j.st,lat:j.lat,lng:j.lng,lca:j.lca,jobs:[]});
+    if(!m.has(k)) m.set(k,{co:j.co,city:j.city,st:j.st,country:j.country,iso:j.iso,lat:j.lat,lng:j.lng,lca:j.lca,jobs:[]});
     m.get(k).jobs.push(j);
   });
   return [...m.values()].sort((a,b)=>b.jobs.length-a.jobs.length);
@@ -486,8 +496,9 @@ function groupSites(rows){
 function popupHTML(s){
   const roles=s.jobs.sort((a,b)=>a.age-b.age).map(j=>
     `<li>${j.title}<span>${j.lvl} · ${j.type} · $${j.min}k-$${j.max}k · ${j.age}d ago</span></li>`).join('');
-  return `<div class="pop"><h5>${s.co}</h5><div class="ps">${s.city?s.city+", ":""}${s.st} · `+
-    (s.lca?`${s.lca} H-1B filings`:'no filing record')+`</div><ul>${roles}</ul></div>`;
+  const loc=[s.city, s.iso==='US'?s.st:s.country].filter(Boolean).join(", ");
+  const spon = s.iso==='US' ? (s.lca?`${s.lca} H-1B filings`:'no filing record') : s.country;
+  return `<div class="pop"><h5>${s.co}</h5><div class="ps">${loc} · ${spon}</div><ul>${roles}</ul></div>`;
 }
 
 function drawMap(){
@@ -503,7 +514,7 @@ function drawMap(){
   sites.forEach((s,i)=>{
     const n=s.jobs.length, d=n>1?34:28;
     const m=L.marker([s.lat,s.lng],{
-      n, icon:L.divIcon({className:'pin'+(s.lca?'':' no'),html:`<b>${n}</b>`,
+      n, icon:L.divIcon({className:'pin'+((s.iso==='US'&&s.lca)?'':' no'),html:`<b>${n}</b>`,
         iconSize:[d,d],iconAnchor:[d/2,d/2]})
     });
     m.bindTooltip(`${s.co} · ${n} role${n>1?'s':''}`,{className:'tt',direction:'top',offset:[0,-14]});
@@ -545,27 +556,29 @@ function render(){
     <div class="card" data-s="${si}">
       <h3>${j.url?`<a href="${j.url}" target="_blank" rel="noopener">${j.title}</a>`:j.title}</h3>
       <div class="co">${j.co}${j.domain&&j.domain!=='Other'?` <span class="dom">${j.domain}</span>`:''}</div>
-      <div class="meta">${j.city?j.city+", ":""}${j.st}${j.zip?" "+j.zip:""} · via ${j.src}</div>
+      <div class="meta">${[j.city, j.iso==='US'?j.st:j.country].filter(Boolean).join(', ')} · via ${j.src}</div>
       <div class="pills">
         <span class="pill">${j.lvl}</span><span class="pill">${j.type}</span>
         ${j.min&&j.max?`<span class="pill pay">$${j.min}k-$${j.max}k</span>`:'<span class="pill">pay not posted</span>'}
-        <span class="pill ${j.lca?'spon':'nospon'}">${j.lca?j.lca+' H-1B':'no record'}</span>
+        ${j.iso==='US'
+          ? `<span class="pill ${j.lca?'spon':'nospon'}">${j.lca?j.lca+' H-1B':'no record'}</span>`
+          : (j.country?`<span class="pill">${j.country}</span>`:'')}
         <span class="pill ${j.age<=7?'fresh':''}">${j.age}d ago</span>
         ${j.deg==='phd'?'<span class="pill nospon">PhD</span>':''}
-      </div>${bars(j.lca)}
+      </div>${j.iso==='US'?bars(j.lca):''}
     </div>`).join('')
-    : `<div class="empty">No roles match. Try widening the pay floor, the date window, or clearing the state.</div>`;
+    : `<div class="empty">No roles match. Try clearing the country, widening the pay floor, or the date window.</div>`;
 
   document.querySelectorAll('.card').forEach(c=>c.onclick=()=>selectSite(+c.dataset.s,true));
   fit();
 }
 function bars(n){const c=conf(n);return `<div class="meter">${[0,1,2,3].map(i=>`<i class="${i<c?'f':''}"></i>`).join('')}</div>`;}
 
-['f-domain','f-state','f-city','f-title','f-level','f-type','f-pay','f-spon','f-age','f-phd'].forEach(id=>
-  $(id).addEventListener('input',()=>{ if(id==='f-state') cityOptions($('f-state').value); render(); }));
+['f-country','f-domain','f-city','f-title','f-level','f-type','f-pay','f-spon','f-age','f-phd'].forEach(id=>
+  $(id).addEventListener('input',()=>{ if(id==='f-country') cityOptions($('f-country').value); render(); }));
 
 $('reset').onclick=()=>{
-  ['f-domain','f-state','f-city','f-title','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
+  ['f-country','f-domain','f-city','f-title','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
   $('f-spon').checked=false; $('f-age').value='30'; $('f-phd').checked=true;
   cityOptions(''); render();
 };
