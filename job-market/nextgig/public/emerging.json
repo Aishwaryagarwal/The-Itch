@@ -32,10 +32,6 @@
   "n": 5
  },
  {
-  "title": "Engagement Manager",
-  "n": 4
- },
- {
   "title": "Principal Engineer - Privacy",
   "n": 4
  },
@@ -53,6 +49,10 @@
  },
  {
   "title": "Director, Field Engineering",
+  "n": 3
+ },
+ {
+  "title": "Engagement Manager",
   "n": 3
  },
  {
@@ -344,10 +344,6 @@
   "n": 2
  },
  {
-  "title": "Senior Customer Engineer, Digital Native Enterprise - Bay Area",
-  "n": 2
- },
- {
   "title": "Senior SASE Specialist, Enterprise (Central or East)",
   "n": 2
  },
@@ -397,10 +393,6 @@
  },
  {
   "title": "Senior People Technology Analyst",
-  "n": 2
- },
- {
-  "title": "Software Engineer I",
   "n": 2
  },
  {
@@ -477,6 +469,14 @@
  },
  {
   "title": "Software Engineer - Environment Platform",
+  "n": 2
+ },
+ {
+  "title": "Manager FP&A, Distribution Partnerships",
+  "n": 2
+ },
+ {
+  "title": "Research Scientist - Generative Audio",
   "n": 2
  }
 ]
