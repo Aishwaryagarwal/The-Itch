@@ -84,6 +84,10 @@
   "n": 3
  },
  {
+  "title": "Senior Software Engineer - Security Libraries",
+  "n": 3
+ },
+ {
   "title": "Staff Software Engineer - Security Agent",
   "n": 3
  },
@@ -292,14 +296,6 @@
   "n": 2
  },
  {
-  "title": "Program Manager, Security Business Enablement",
-  "n": 2
- },
- {
-  "title": "Risk Operations Analyst, Financial Crimes",
-  "n": 2
- },
- {
   "title": "Strategic Programs Lead, New Markets",
   "n": 2
  },
@@ -344,10 +340,6 @@
   "n": 2
  },
  {
-  "title": "Senior SASE Specialist, Enterprise (Central or East)",
-  "n": 2
- },
- {
   "title": "Director, Events",
   "n": 2
  },
@@ -357,10 +349,6 @@
  },
  {
   "title": "Principal Enablement Partner, BDR",
-  "n": 2
- },
- {
-  "title": "Senior Lead Product Manager, Enterprise",
   "n": 2
  },
  {
@@ -478,5 +466,17 @@
  {
   "title": "Research Scientist - Generative Audio",
   "n": 2
+ },
+ {
+  "title": "Staff Engineer - Content Intelligence Infrastructure",
+  "n": 2
+ },
+ {
+  "title": "Accounting Manager",
+  "n": 1
+ },
+ {
+  "title": "AI Operations",
+  "n": 1
  }
 ]
