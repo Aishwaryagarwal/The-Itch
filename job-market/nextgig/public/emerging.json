@@ -12,10 +12,6 @@
   "n": 8
  },
  {
-  "title": "Technical Account Manager",
-  "n": 6
- },
- {
   "title": "Senior Software Engineer - Fullstack",
   "n": 5
  },
@@ -29,6 +25,10 @@
  },
  {
   "title": "Technical Accounting Manager",
+  "n": 5
+ },
+ {
+  "title": "Technical Account Manager",
   "n": 5
  },
  {
@@ -76,7 +76,7 @@
   "n": 3
  },
  {
-  "title": "Major Account Manager",
+  "title": "Technical Program Manager",
   "n": 3
  },
  {
@@ -93,6 +93,14 @@
  },
  {
   "title": "Hospitality Partner Account Manager, Mid-Enterprise",
+  "n": 3
+ },
+ {
+  "title": "Partner Account Manager, Commercial",
+  "n": 3
+ },
+ {
+  "title": "Sr. Manager, Customer Advocacy",
   "n": 3
  },
  {
@@ -300,15 +308,15 @@
   "n": 2
  },
  {
-  "title": "Technical Program Manager",
-  "n": 2
- },
- {
   "title": "Technical Program Manager, Risk",
   "n": 2
  },
  {
   "title": "Deal Desk Analyst",
+  "n": 2
+ },
+ {
+  "title": "Major Account Manager",
   "n": 2
  },
  {
@@ -344,7 +352,7 @@
   "n": 2
  },
  {
-  "title": "Partner Account Manager, Commercial",
+  "title": "Lead People Systems Engineer",
   "n": 2
  },
  {
@@ -470,13 +478,5 @@
  {
   "title": "Staff Engineer - Content Intelligence Infrastructure",
   "n": 2
- },
- {
-  "title": "Accounting Manager",
-  "n": 1
- },
- {
-  "title": "AI Operations",
-  "n": 1
  }
 ]
