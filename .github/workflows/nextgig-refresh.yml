@@ -49,11 +49,15 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Cloudflare Pages normally redeploys on its own when the push above lands.
-      # This step is a safety net: if you add a CF_DEPLOY_HOOK secret it will
-      # also poke Cloudflare directly. Without the secret it quietly does nothing.
-      - name: Nudge Cloudflare Pages
+      # The site is hosted on Netlify, which redeploys by itself when the push
+      # above lands, so this step is only a safety net for when that webhook is
+      # slow or missed. Add a NETLIFY_BUILD_HOOK secret (Site configuration ->
+      # Build & deploy -> Build hooks) and it will POST the hook directly.
+      # Without the secret it does nothing, which is exactly what the old
+      # CF_DEPLOY_HOOK step did for its whole life — the secret was never set,
+      # and it named Cloudflare on a site that has always been on Netlify.
+      - name: Nudge Netlify
         if: steps.commit.outputs.changed == 'true' && env.HOOK != ''
         env:
-          HOOK: ${{ secrets.CF_DEPLOY_HOOK }}
-        run: curl -sS -X POST "$HOOK" && echo "deploy hook sent"
+          HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+        run: curl -sS -X POST -d '{}' "$HOOK" && echo "build hook sent"
