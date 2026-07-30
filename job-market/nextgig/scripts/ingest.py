@@ -76,12 +76,77 @@ STANDALONE = re.compile(
 
 EXCLUDE = re.compile(
     r"\b(intern|internship|apprentice|co.?op|new grad|graduate program|"
-    r"sales|account executive|recruit|talent acquisition|marketing|"
+    r"sales|account executive|recruit\w*|talent acquisition|marketing|"
     r"customer success|support engineer|qa|test engineer|"
     r"nurse|clinical|attorney|paralegal|driver|technician|warehouse associate|"
     r"security engineer|network engineer|site reliability|devops)\b", re.I)
 
 review_queue = Counter()
+
+# ============================================================ BODY SIGNAL
+# Titles lie, especially outside tech. A mid-market manufacturer advertises
+# "Supply Chain System Engineer" for a job that is SQL, dbt and dashboards all
+# day — the exact title AH Group filed an LCA for. The body does not lie, and
+# we already download it, so read it before dropping a posting on its title.
+#
+# TOOLS is high precision: naming dbt or Airflow means a data role regardless of
+# what the title says. CRAFT is lower precision, so it only counts in support.
+# Distinct terms are counted, not occurrences — one JD saying "SQL" ten times is
+# still one signal, and repetition is how boilerplate fools a keyword filter.
+
+BODY_TOOLS = re.compile(
+    r"\b(sql|python|dbt|airflow|spark|kafka|snowflake|databricks|redshift|"
+    r"bigquery|synapse|ssis|informatica|tableau|power ?bi|looker|qlik|"
+    r"pandas|numpy|scikit.?learn|pytorch|tensorflow|sagemaker|mlflow|"
+    r"etl|elt|data ?warehouse|lakehouse|star schema|dimensional model)\b", re.I)
+
+BODY_CRAFT = re.compile(
+    r"\b(dashboard|data pipeline|data model|data quality|data governance|"
+    r"business intelligence|reporting|forecasting|predictive model|"
+    r"a/b test|experimentation|kpi|metric definition|root cause analysis)\b", re.I)
+
+
+def body_signal(body):
+    """(distinct tool hits, distinct craft hits) — the evidence, not a verdict."""
+    b = body or ""
+    return (len({m.group(0).lower() for m in BODY_TOOLS.finditer(b)}),
+            len({m.group(0).lower() for m in BODY_CRAFT.finditer(b)}))
+
+
+# Business functions that are never the job we want, however much data jargon
+# their JD carries. At a data company every posting says "Spark" and "lakehouse"
+# in the boilerplate, so an accountant scores as well as an analytics engineer on
+# tools alone — the title is the only thing that separates them. Overridden when
+# the title itself carries a DOMAIN word, so "Treasury Finance AI & Quantitative
+# Analytics" survives while "Senior Associate, Strategic Finance" does not.
+NON_DATA = re.compile(
+    r"\b(account(ant|ing)|payroll|bookkeep\w*|controller|treasur\w*|tax|audit\w*|"
+    r"financ\w*|counsel|legal|paralegal|communications|public relations|press|"
+    r"recruit\w*|talent|people|human resources|hr|workplace|facilities|benefits|"
+    r"executive assistant|office manager|compensation|equity admin|"
+    r"sdr|bdr|business development|alliance\w*|partner\w*|channel|gtm|salesforce|"
+    r"solutions? engineer|sales engineer|field engineer\w*|field cto|pre.?sales|"
+    r"account manager|customer|success|renewal|procure\w*|purchasing|sourcing|"
+    r"security|compliance|risk|privacy|trust and safety|"
+    r"program manager|project manager|chief of staff|strategy)\b", re.I)
+
+
+def rescuable(title):
+    """A title vague enough to be worth reading the JD for."""
+    return bool(DOMAIN.search(title)) or not NON_DATA.search(title)
+
+
+def body_matches(body, employer=""):
+    """
+    True when the JD reads like data work even though the title did not.
+    The employer's own name is stripped first: every Databricks posting says
+    "Databricks", which is boilerplate, not evidence about this specific role.
+    Both thresholds must clear — tools prove the stack, craft proves the work,
+    and vendor boilerplate supplies plenty of the former without any of the latter.
+    """
+    b = re.sub(re.escape(employer), " ", body or "", flags=re.I) if employer else (body or "")
+    tools, craft = body_signal(b)
+    return tools >= 3 and craft >= 2
 
 LEVEL_RULES = [
     (r"\b(vp|vice president|head of|director)\b", "Director"),
@@ -187,23 +252,48 @@ def parse_date(v):
 
 
 # ============================================================ FETCHERS
+def get_json(url, tries=3, backoff=2.0):
+    """
+    GET with retries. ATS endpoints reset connections under load, and a single
+    ConnectionResetError against the largest employer is exactly what turned the
+    2026-07-30 run red: Databricks and Klaviyo both dropped, output fell to 23
+    rows from 49, and the freshness guard correctly aborted the whole job. One
+    transient reset should not cost a day of data, so retry with backoff first.
+    """
+    last = None
+    for i in range(tries):
+        try:
+            r = requests.get(url, timeout=25, headers={"User-Agent": "nextgig/2.0"})
+            r.raise_for_status()
+            return r.json()
+        except (requests.RequestException, ValueError) as e:
+            last = e
+            if i < tries - 1:
+                time.sleep(backoff * (2 ** i))          # 2s, then 4s
+    raise last
+
+
 def fetch_greenhouse(slug):
-    r = requests.get(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true", timeout=25)
-    for j in r.json().get("jobs", []):
+    for j in get_json(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true").get("jobs", []):
         yield {"co": slug, "title": j["title"], "loc": j.get("location", {}).get("name", ""),
                "body": j.get("content", ""), "url": j["absolute_url"], "src": "Greenhouse",
                "posted": parse_date(j.get("first_published") or j.get("updated_at"))}
 
 def fetch_lever(slug):
-    r = requests.get(f"https://api.lever.co/v0/postings/{slug}?mode=json", timeout=25)
-    for j in r.json():
+    data = get_json(f"https://api.lever.co/v0/postings/{slug}?mode=json")
+    # A retired board answers 200 with {"ok": false, "error": "..."} rather than
+    # an error status. Iterating that dict yields its string keys, so the old
+    # code failed with "string indices must be integers" — which named neither
+    # the board nor the cause. sigmacomputing has been dead this way for a while.
+    if not isinstance(data, list):
+        raise ValueError(f"lever board unavailable: {data.get('error', data)!r}")
+    for j in data:
         yield {"co": slug, "title": j["text"], "loc": j.get("categories", {}).get("location", ""),
                "body": j.get("descriptionPlain", ""), "url": j["hostedUrl"], "src": "Lever",
                "posted": parse_date(j.get("createdAt"))}
 
 def fetch_ashby(slug):
-    r = requests.get(f"https://api.ashbyhq.com/posting-api/job-board/{slug}?includeCompensation=true", timeout=25)
-    for j in r.json().get("jobs", []):
+    for j in get_json(f"https://api.ashbyhq.com/posting-api/job-board/{slug}?includeCompensation=true").get("jobs", []):
         yield {"co": slug, "title": j["title"], "loc": j.get("location", ""),
                "body": j.get("descriptionPlain", ""), "url": j["jobUrl"], "src": "Ashby",
                "posted": parse_date(j.get("publishedAt"))}
@@ -534,6 +624,11 @@ def main():
     ap.add_argument("--max-age", type=int, default=30)
     ap.add_argument("--no-phd", action="store_true")
     ap.add_argument("--review", action="store_true")
+    ap.add_argument("--rescue-by-jd", action="store_true",
+                    help="keep postings whose title misses but whose JD reads like data work. "
+                         "Off by default: at data-native employers every JD is saturated with "
+                         "the vocabulary, so this measures boilerplate, not the role. Intended "
+                         "for mid-market non-tech employers once they are in TARGETS.")
     ap.add_argument("--build-sponsors", nargs="*", metavar="CSV",
                     help="collapse LCA files into data/sponsors.json, then exit")
     args = ap.parse_args()
@@ -544,7 +639,7 @@ def main():
 
     sponsors = load_sponsors(args.lca) if args.lca else read_sponsors()
     cutoff = datetime.now(timezone.utc) - timedelta(days=args.max_age)
-    rows, seen, dropped = [], set(), Counter()
+    rows, seen, dropped, rescued = [], set(), Counter(), Counter()
 
     for kind, slug in TARGETS:
         try:
@@ -555,7 +650,12 @@ def main():
 
         kept = 0
         for p in postings:
-            if not title_matches(p["title"]):
+            keep, via = title_matches(p["title"]), "title"
+            if (args.rescue_by_jd and not keep and not EXCLUDE.search(p["title"])
+                    and rescuable(p["title"]) and body_matches(p["body"], slug)):
+                keep, via = True, "body"      # title said nothing, the JD did
+                rescued[slug] += 1
+            if not keep:
                 dropped["title"] += 1; continue
             if p["posted"] is None:
                 dropped["no_date"] += 1; continue      # unknown age == unusable
@@ -581,6 +681,7 @@ def main():
                 "city": g["city"], "st": g["st"], "zip": g["zip"],
                 "lat": g["lat"], "lng": g["lng"],
                 "lvl": level_of(p["title"]),
+                "via": via,
                 "type": work_type(p["loc"], p["body"]),
                 "min": lo, "max": hi,
                 "lca": sponsors.get(norm_employer(slug), 0),
@@ -590,7 +691,8 @@ def main():
                 "src": p["src"], "url": p["url"],
             })
             kept += 1
-        print(f"  {slug:<18} {kept:>3} kept / {len(postings)} total")
+        r = f"  ({rescued[slug]} by JD)" if rescued[slug] else ""
+        print(f"  {slug:<18} {kept:>3} kept / {len(postings)} total{r}")
 
 
     if args.review:
