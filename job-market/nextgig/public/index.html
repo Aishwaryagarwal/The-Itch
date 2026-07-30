@@ -237,6 +237,7 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
 
   <div class="tabs">
     <button class="tab on" data-view="jobs">Open roles</button>
+    <button class="tab" data-view="lookup">Sponsor lookup</button>
     <button class="tab" data-view="watch">Worth watching</button>
     <button class="tab" data-view="emerging">Emerging titles</button>
     <button class="tab" data-view="events">Events</button>
@@ -249,6 +250,7 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
       <label>Domain</label><select id="f-domain"><option value="">All domains</option></select>
       <label>City</label><select id="f-city"><option value="">All cities</option></select>
       <label>Title contains</label><input type="text" id="f-title" placeholder="e.g. analytics, platform">
+      <label>Company contains</label><input type="text" id="f-co" placeholder="e.g. stripe">
       <label>Level</label><select id="f-level"><option value="">Any level</option></select>
       <label>Work setup</label><select id="f-type"><option value="">Any setup</option></select>
       <label>Minimum base ($k)</label><input type="number" id="f-pay" placeholder="e.g. 150" step="10">
@@ -279,6 +281,19 @@ select:focus,input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 
     </div>
 
     <div class="list" id="list"></div>
+  </div>
+
+  <!-- Answers the question the open-roles map cannot: you found a posting
+       somewhere else, and want to know whether that employer has ever filed
+       for a data role. Backed by every certified LCA in FY2024-FY2025, so it
+       covers ~17k employers rather than the handful we scrape directly. -->
+  <div class="events" id="view-lookup" hidden>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+      <input type="text" id="lk-q" placeholder="Type a company name, e.g. american hydrostatics"
+             style="flex:1;min-width:260px;max-width:520px">
+      <span id="lk-count" class="tag"></span>
+    </div>
+    <div id="lk-out"></div>
   </div>
 
   <div class="watch" id="view-watch" hidden>
@@ -414,6 +429,13 @@ const WATCH = [
 const TAGS={cadence:"Posts regularly, quiet now",funding:"Recent raise",adjacent:"Domain adjacency",signal:"Team-building signal"};
 
 const $=id=>document.getElementById(id);
+
+// Employer names come straight from DOL filings and contain & and quotes
+// ("Smith & Sons, Inc."), so anything interpolated into innerHTML is escaped.
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,c=>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 const conf=n=>n===0?0:n<25?1:n<100?2:n<400?3:4;
 const EMERGING=[];
 const fill=(el,v)=>v.forEach(x=>el.insertAdjacentHTML('beforeend',`<option>${x}</option>`));
@@ -479,6 +501,8 @@ function matches(j){
   if(co&&j.country!==co) return false;
   if(city&&j.city!==city) return false;
   if(t&&!(j.title+' '+j.co).toLowerCase().includes(t)) return false;
+  const cn=$('f-co').value.trim().toLowerCase();
+  if(cn&&!j.co.toLowerCase().includes(cn)) return false;
   if(lv&&j.lvl!==lv) return false;
   if(ty&&j.type!==ty) return false;
   if(!isNaN(pay)&&(!j.max||j.max<pay)) return false;
@@ -581,11 +605,11 @@ function render(){
 }
 function bars(n){const c=conf(n);return `<div class="meter">${[0,1,2,3].map(i=>`<i class="${i<c?'f':''}"></i>`).join('')}</div>`;}
 
-['f-country','f-domain','f-city','f-title','f-level','f-type','f-pay','f-spon','f-age','f-phd'].forEach(id=>
+['f-country','f-domain','f-city','f-title','f-co','f-level','f-type','f-pay','f-spon','f-age','f-phd'].forEach(id=>
   $(id).addEventListener('input',()=>{ if(id==='f-country') cityOptions($('f-country').value); render(); }));
 
 $('reset').onclick=()=>{
-  ['f-domain','f-city','f-title','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
+  ['f-domain','f-city','f-title','f-co','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
   // Reset returns to the opening view, which means back to the US — not to an
   // unfiltered world. Clearing to "" here would make reset differ from load.
   $('f-country').value=[...$('f-country').options].some(o=>o.value===DEFAULT_COUNTRY)?DEFAULT_COUNTRY:'';
@@ -682,7 +706,47 @@ function renderRadarPreview(){
   $('soon-radar').innerHTML=`<svg viewBox="0 0 280 250" role="img" aria-label="Skills radar preview">${g}</svg>`;
 }
 
-const PANELS={jobs:'view-jobs',watch:'view-watch',emerging:'view-emerging',events:'view-events',soon:'view-soon'};
+document.addEventListener('DOMContentLoaded',()=>$('lk-q')&&$('lk-q').addEventListener('input',renderLookup));
+const PANELS={jobs:'view-jobs',lookup:'view-lookup',watch:'view-watch',emerging:'view-emerging',events:'view-events',soon:'view-soon'};
+
+// ---- sponsor lookup -------------------------------------------------------
+// 1.2MB of employers, so it is fetched on first use rather than at boot: most
+// visits never open this tab and should not pay for it.
+let LOOKUP=null, lookupLoading=false;
+const TIER={r:'2+ data filings', s:'1 data filing'};
+
+async function loadLookup(){
+  if(LOOKUP||lookupLoading) return;
+  lookupLoading=true;
+  $('lk-count').textContent='loading…';
+  LOOKUP = await grab('sponsors-lookup.json') || [];
+  lookupLoading=false;
+  $('lk-count').textContent=`${LOOKUP.length.toLocaleString()} employers`;
+  renderLookup();
+}
+
+function renderLookup(){
+  if(!LOOKUP) return;
+  const q=$('lk-q').value.trim().toLowerCase();
+  const out=$('lk-out');
+  if(q.length<2){
+    out.innerHTML='<div class="empty">Type at least two characters. This searches every employer that filed a certified LCA for a data role in FY2024-FY2025 — not just the boards we scrape, so a company can appear here with no open roles on the map.</div>';
+    return;
+  }
+  const hits=LOOKUP.filter(r=>r[0].toLowerCase().includes(q));
+  if(!hits.length){
+    out.innerHTML=`<div class="empty">No employer matching “${esc(q)}” filed a data-role LCA in FY2024-FY2025. That is not proof they never sponsor — they may sponsor for other occupations, or not have filed in this window.</div>`;
+    return;
+  }
+  out.innerHTML = hits.slice(0,200).map(r=>`
+    <div class="erow2">
+      <div class="ev-date">${r[2]} filing${r[2]===1?'':'s'}<div class="soon">${TIER[r[4]]||''}</div></div>
+      <div><div class="ev-name">${esc(r[0])}</div>
+        <div class="meta">${esc(r[1])} · ${esc(r[3])}</div></div>
+      <div></div>
+    </div>`).join('') +
+    (hits.length>200?`<div class="empty">${hits.length-200} more matches — narrow the search.</div>`:'');
+}
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
   const v=t.dataset.view;
@@ -692,6 +756,7 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   else if(v==='emerging') renderEmerging();
   else if(v==='events') renderEvents();
   else if(v==='soon') renderRadarPreview();
+  else if(v==='lookup') loadLookup();
 });
 
 async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r.ok?await r.json():null; }catch(e){ return null; } }

@@ -20,3 +20,6 @@ venv/
 
 # iCloud sync artifacts
 *.icloud
+
+# Local Netlify folder
+.netlify
