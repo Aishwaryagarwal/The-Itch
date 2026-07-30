@@ -1,5 +1,5 @@
 # Netlify deploy config for the NextGig site.
-# The repo is an umbrella ("The Itch"); the deployable site is the static
+# The repo is an umbrella; the deployable site is the static
 # job-market/nextgig/public/ folder. No build step — it is plain HTML/JSON.
 # Connecting this repo as a new Netlify site picks these up automatically.
 
