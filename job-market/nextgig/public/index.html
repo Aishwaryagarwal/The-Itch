@@ -422,6 +422,8 @@ const fill=(el,v)=>v.forEach(x=>el.insertAdjacentHTML('beforeend',`<option>${x}<
 // alphabetically. Nothing is hidden — the whole world stays selectable.
 const TARGET_MARKETS=["India","United Arab Emirates","Singapore","United States",
   "Qatar","Saudi Arabia","Bahrain","Hong Kong","Japan","South Korea","Australia","Malaysia"];
+const DEFAULT_COUNTRY='United States';   // opening view; the picker still offers all
+
 function countryOrder(a,b){
   const ia=TARGET_MARKETS.indexOf(a), ib=TARGET_MARKETS.indexOf(b);
   if(ia>=0&&ib>=0) return ia-ib;
@@ -435,6 +437,11 @@ function rebuildOptions(){
   $('f-type').innerHTML='<option value="">Any setup</option>';
   $('w-state').innerHTML='<option value="">All states</option>';
   fill($('f-country'),[...new Set(JOBS.map(j=>j.country))].filter(Boolean).sort(countryOrder));
+  // Default to the US rather than "All countries": it is where the bulk of the
+  // roles and the entire H-1B signal live, so an unfiltered world view buries
+  // the useful rows. Every other country stays one click away in the same list.
+  if([...$('f-country').options].some(o=>o.value===DEFAULT_COUNTRY))
+    $('f-country').value=DEFAULT_COUNTRY;
   fill($('f-domain'),[...new Set(JOBS.map(j=>j.domain))].filter(Boolean).sort());
   fill($('f-level'),["Mid","Senior","Staff","Lead","Manager","Director"]);
   fill($('f-type'),[...new Set(JOBS.map(j=>j.type))].filter(Boolean).sort());
@@ -578,9 +585,12 @@ function bars(n){const c=conf(n);return `<div class="meter">${[0,1,2,3].map(i=>`
   $(id).addEventListener('input',()=>{ if(id==='f-country') cityOptions($('f-country').value); render(); }));
 
 $('reset').onclick=()=>{
-  ['f-country','f-domain','f-city','f-title','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
+  ['f-domain','f-city','f-title','f-level','f-type','f-pay'].forEach(i=>$(i).value='');
+  // Reset returns to the opening view, which means back to the US — not to an
+  // unfiltered world. Clearing to "" here would make reset differ from load.
+  $('f-country').value=[...$('f-country').options].some(o=>o.value===DEFAULT_COUNTRY)?DEFAULT_COUNTRY:'';
   $('f-spon').checked=false; $('f-age').value='30'; $('f-phd').checked=true;
-  cityOptions(''); render();
+  cityOptions($('f-country').value); render();
 };
 $('v-pins').onclick=()=>{mode='pins';$('v-pins').classList.add('on');$('v-heat').classList.remove('on');drawMap();};
 $('v-heat').onclick=()=>{mode='heat';$('v-heat').classList.add('on');$('v-pins').classList.remove('on');
@@ -711,7 +721,9 @@ async function grab(f){ try{ const r=await fetch(f,{cache:'no-store'}); return r
   } else {
     $('src-note').innerHTML = '<b class="dot stale"></b>Showing bundled sample data. Run <code>scripts/ingest.py</code> to generate <code>jobs.json</code>, this switches to live on its own.';
   }
-  rebuildOptions(); cityOptions(''); render(); renderWatch(); renderEmerging(); renderEvents(); renderRadarPreview();
+  // cityOptions reads the country rebuildOptions just selected, so the city list
+  // matches the active filter on first paint instead of listing the whole world.
+  rebuildOptions(); cityOptions($('f-country').value); render(); renderWatch(); renderEmerging(); renderEvents(); renderRadarPreview();
 })();
 </script>
 

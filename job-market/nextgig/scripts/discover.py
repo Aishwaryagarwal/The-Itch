@@ -68,7 +68,10 @@ SOC_BROAD = {
 }
 
 # SOC codes broad enough that the job title, not the code, decides.
-TITLE_GATED = {"15-1252"} | set(SOC_BROAD)
+# 13-1111 "Management Analysts" is the worst offender after 15-1252: every
+# consultancy files under it, which is how "Chief Of Staff", "Principal
+# Consultant" and "VP, Plant Operational Technology" reached a data-roles list.
+TITLE_GATED = {"15-1252", "13-1111", "11-3021", "15-1253"} | set(SOC_BROAD)
 
 TITLE_HINT = re.compile(
     r"\b(data|analytic|analyst|bi\b|business intelligence|warehouse|etl|"
