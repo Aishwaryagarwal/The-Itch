@@ -1,11 +1,11 @@
 [
  {
-  "title": "Sr. Solutions Engineer",
+  "title": "Staff Software Engineer - Backend",
   "n": 11
  },
  {
-  "title": "Staff Software Engineer - Backend",
-  "n": 11
+  "title": "Sr. Solutions Engineer",
+  "n": 10
  },
  {
   "title": "Senior Software Engineer - Backend",
@@ -40,10 +40,6 @@
   "n": 4
  },
  {
-  "title": "Software Engineer",
-  "n": 4
- },
- {
   "title": "Senior Software Engineer - Autonomous Systems",
   "n": 4
  },
@@ -73,6 +69,10 @@
  },
  {
   "title": "Senior Software Engineer",
+  "n": 3
+ },
+ {
+  "title": "Software Engineer",
   "n": 3
  },
  {
@@ -296,7 +296,15 @@
   "n": 2
  },
  {
+  "title": "Privacy Operations Program Manager",
+  "n": 2
+ },
+ {
   "title": "Product Lead, EMEA Payments",
+  "n": 2
+ },
+ {
+  "title": "Risk Operations Analyst, Financial Crimes",
   "n": 2
  },
  {
@@ -345,6 +353,10 @@
  },
  {
   "title": "Senior Partner Manager - Channels",
+  "n": 2
+ },
+ {
+  "title": "Senior Systems Engineer",
   "n": 2
  },
  {
@@ -465,18 +477,6 @@
  },
  {
   "title": "Software Engineer - Environment Platform",
-  "n": 2
- },
- {
-  "title": "Manager FP&A, Distribution Partnerships",
-  "n": 2
- },
- {
-  "title": "Research Scientist - Generative Audio",
-  "n": 2
- },
- {
-  "title": "Staff Engineer - Content Intelligence Infrastructure",
   "n": 2
  }
 ]
