@@ -40,6 +40,10 @@
   "n": 4
  },
  {
+  "title": "Software Engineer",
+  "n": 4
+ },
+ {
   "title": "Senior Software Engineer - Autonomous Systems",
   "n": 4
  },
@@ -68,19 +72,19 @@
   "n": 3
  },
  {
+  "title": "Risk Operations Analyst, Financial Crimes",
+  "n": 3
+ },
+ {
   "title": "Senior Software Engineer",
   "n": 3
  },
  {
-  "title": "Software Engineer",
+  "title": "Staff Full Stack Engineer, Payments Intelligence",
   "n": 3
  },
  {
   "title": "Senior Software Engineer - REDAPL Graph Engine",
-  "n": 3
- },
- {
-  "title": "Senior Software Engineer - Security Libraries",
   "n": 3
  },
  {
@@ -304,7 +308,7 @@
   "n": 2
  },
  {
-  "title": "Risk Operations Analyst, Financial Crimes",
+  "title": "Strategic Programs Lead, New Markets",
   "n": 2
  },
  {
@@ -313,6 +317,10 @@
  },
  {
   "title": "User Escalation Specialist",
+  "n": 2
+ },
+ {
+  "title": "Indirect Tax Manager",
   "n": 2
  },
  {
@@ -352,6 +360,10 @@
   "n": 2
  },
  {
+  "title": "Staff Software Engineer - Corporate Development",
+  "n": 2
+ },
+ {
   "title": "Professional Services Engineer",
   "n": 2
  },
@@ -372,7 +384,7 @@
   "n": 2
  },
  {
-  "title": "Senior Security Compliance Engineer",
+  "title": "Product Leader, Finance Engineering",
   "n": 2
  },
  {
@@ -465,18 +477,6 @@
  },
  {
   "title": "Software Engineer - Apollo Systems",
-  "n": 2
- },
- {
-  "title": "Software Engineer - Core Interfaces",
-  "n": 2
- },
- {
-  "title": "Software Engineer - Defense Applications",
-  "n": 2
- },
- {
-  "title": "Software Engineer - Environment Platform",
   "n": 2
  }
 ]
