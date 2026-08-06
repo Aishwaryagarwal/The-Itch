@@ -9,7 +9,11 @@
  },
  {
   "title": "Sr. Solutions Engineer",
-  "n": 8
+  "n": 7
+ },
+ {
+  "title": "Technical Account Manager",
+  "n": 6
  },
  {
   "title": "Senior Software Engineer - Fullstack",
@@ -28,19 +32,11 @@
   "n": 5
  },
  {
-  "title": "Technical Account Manager",
-  "n": 5
- },
- {
   "title": "Principal Engineer - Privacy",
   "n": 4
  },
  {
   "title": "Technical Program Manager",
-  "n": 4
- },
- {
-  "title": "Software Engineer",
   "n": 4
  },
  {
@@ -64,10 +60,6 @@
   "n": 3
  },
  {
-  "title": "Integration Engineer (Client facing), Professional Services",
-  "n": 3
- },
- {
   "title": "Product Manager, Ecosystem Risk",
   "n": 3
  },
@@ -80,7 +72,7 @@
   "n": 3
  },
  {
-  "title": "Staff Full Stack Engineer, Payments Intelligence",
+  "title": "Software Engineer",
   "n": 3
  },
  {
@@ -276,6 +268,10 @@
   "n": 2
  },
  {
+  "title": "Backend Engineer, Core Technology",
+  "n": 2
+ },
+ {
   "title": "Backend Engineer, Payments and Risk",
   "n": 2
  },
@@ -293,6 +289,10 @@
  },
  {
   "title": "Manager, Technical Account Management",
+  "n": 2
+ },
+ {
+  "title": "Monetization Operations Analyst",
   "n": 2
  },
  {
@@ -325,10 +325,6 @@
  },
  {
   "title": "Major Account Manager",
-  "n": 2
- },
- {
-  "title": "Manager II, Premier Support Engineering",
   "n": 2
  },
  {
@@ -477,6 +473,10 @@
  },
  {
   "title": "Software Engineer - Apollo Systems",
+  "n": 2
+ },
+ {
+  "title": "Software Engineer - Core Interfaces",
   "n": 2
  }
 ]
