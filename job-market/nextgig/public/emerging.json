@@ -48,6 +48,10 @@
   "n": 4
  },
  {
+  "title": "Technical Program Manager  - Autonomous Systems C2",
+  "n": 4
+ },
+ {
   "title": "Director, Field Engineering",
   "n": 3
  },
@@ -68,10 +72,6 @@
   "n": 3
  },
  {
-  "title": "Senior Software Engineer",
-  "n": 3
- },
- {
   "title": "Software Engineer",
   "n": 3
  },
@@ -81,10 +81,6 @@
  },
  {
   "title": "Staff Software Engineer - Security Agent",
-  "n": 3
- },
- {
-  "title": "Senior Systems Engineer",
   "n": 3
  },
  {
@@ -312,6 +308,14 @@
   "n": 2
  },
  {
+  "title": "Security Analyst, Bug Bounty",
+  "n": 2
+ },
+ {
+  "title": "Senior Software Engineer",
+  "n": 2
+ },
+ {
   "title": "Strategic Programs Lead, New Markets",
   "n": 2
  },
@@ -372,6 +376,10 @@
   "n": 2
  },
  {
+  "title": "Senior Systems Engineer",
+  "n": 2
+ },
+ {
   "title": "Director, Events",
   "n": 2
  },
@@ -428,10 +436,6 @@
   "n": 2
  },
  {
-  "title": "Director, Product Design",
-  "n": 2
- },
- {
   "title": "Software Engineer, Infrastructure",
   "n": 2
  },
@@ -473,10 +477,6 @@
  },
  {
   "title": "Senior Front End Software Engineer - Application Development",
-  "n": 2
- },
- {
-  "title": "Software Engineer - Apollo Systems",
   "n": 2
  }
 ]
